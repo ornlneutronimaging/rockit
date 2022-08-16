@@ -1,2 +1,7 @@
 DataPath:
   ipts : "IPTS-27158"
+ROI:
+  xmin: 250
+  ymin: 600
+  xmax: 1250
+  ymax: 1300
