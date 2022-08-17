@@ -2,6 +2,9 @@ import argparse
 import logging
 import os
 import glob
+import shutil
+
+import dxchange
 from tomopy import find_center_pc, circ_mask, normalize, minus_log
 import tomopy.recon as reconstruction
 from tomopy.prep.alignment import find_slits_corners_aps_1id, remove_slits_aps_1id
@@ -21,13 +24,13 @@ from samffr.retrieve_matching_ob_dc import RetrieveMatchingOBDC
 
 
 #LOG_FILE_NAME = "/HFIR/CG1D/shared/autoreduce/rockit.log"
-LOG_FILE_NAME = "/Users/j35/Desktop/rockit.log"
+LOG_FILE_NAME = "/Users/j35/HFIR/CG1D/shared/autoreduce/rockit.log"
 
 # TOP_FOLDER = "/HFIR/CG1D"
-TOP_FOLDER = "/Users/j35/IPTS/HFIR/CG1D"
+TOP_FOLDER = "/Users/j35/HFIR/CG1D"
 
 
-def rockit_cli(args):
+def main(args):
 
 	# parsing arguments
 	ipts_number = args.ipts_number
@@ -38,8 +41,9 @@ def rockit_cli(args):
 	roi_ymax = args.roi_ymax if args.roi_ymax else 1300
 	roi = [roi_xmin, roi_ymin, roi_xmax, roi_ymax]
 
+	print(f"LOG_FILE_NAME: {LOG_FILE_NAME}")
 	logging.basicConfig(filename=LOG_FILE_NAME,
-						filemode='a',
+						filemode='w',
 						format='[%(levelname)s] - %(asctime)s - %(message)s',
 						level=logging.INFO)
 	logger = logging.getLogger("rockit")
@@ -178,24 +182,25 @@ def rockit_cli(args):
 	recon = circ_mask(recon, axis=0, ratio=0.95)
 	logger.info(f"reconstruction ... done")
 
+	# exporting the reconstructed slices
+	print(f"exporting the reconstructed slices")
+	base_input_folder_name = os.path.basename(input_folder)
+	output_folder = f"{TOP_FOLDER}/IPTS-{ipts_number}/shared/autoreduce/{base_input_folder_name}/"
+	if os.path.exists(output_folder):
+		shutil.rmtree(output_folder)
+	os.makedirs(output_folder)
+
+	logger.info(f"exporting the slices to {output_folder}")
+	dxchange.write_tiff_stack(recon, fname=output_folder + 'reconstruction', overwrite=True)
+	logger.info(f"exporting the slices ... Done!")
+
+	# moving log file to output folder
+	logger.info(f"moving log file to output folder")
+	print(f"moving log from {LOG_FILE_NAME} to {output_folder}")
+	shutil.move(LOG_FILE_NAME, os.path.join(output_folder))
+
 
 if __name__ == "__main__":
-	# import numpy as np
-	# import bm3d_streak_removal as bm3d_rmv
-	# from imars3dv2.filters import tilt
-	# from utilites import get_ind_list, find_proj180_ind, read_tiff_stack, read_tiff_from_full_name_list, set_roi
-	#
-	# import warnings
-	#
-	# warnings.filterwarnings('ignore')
-	#
-	# from samffr.retrieve_matching_ob_dc import RetrieveMatchingOBDC
-	#
-	# # LOG_FILE_NAME = "/HFIR/CG1D/shared/autoreduce/rockit.log"
-	# LOG_FILE_NAME = "/Users/j35/Desktop/rockit.log"
-	#
-	# # TOP_FOLDER = "/HFIR/CG1D"
-	# TOP_FOLDER = "/Users/j35/IPTS/HFIR/CG1D"
 
 	parser = argparse.ArgumentParser(description="""
 	Reconstruct a set of projections from a given folder,
@@ -225,4 +230,4 @@ if __name__ == "__main__":
 
 	args = parser.parse_args()
 
-	rockit_cli(args)
+	main(args)

@@ -9,13 +9,15 @@ DEBUG = True
 
 HOME_FOLDER = "/Users/j35/HFIR/CG1D/shared/autoreduce/"
 # HOME_FOLDER = "/HFIR/CG1D/shared/autoreduce/"
+CMD_FOLDER = "/Users/j35/git/rockit/rockit/"
 
 CONFIG_FILE = os.path.join(HOME_FOLDER, "autoreduce_cg1d_config.yaml")
 JSON_FILE = os.path.join(HOME_FOLDER, "ct_scans_folder_processed.json")
 LOG_FILE = os.path.join(HOME_FOLDER, "reduce_cg1d.log")
 
 # CMD = "python " + os.path.join(HOME_FOLDER, "recon_eval_demo_m0.py")
-CMD = "python " + os.path.join(HOME_FOLDER, "recon_eval_demo_m1.py")
+#CMD = "python " + os.path.join(HOME_FOLDER, "recon_eval_demo_m1.py")
+CMD = "python " + os.path.join(CMD_FOLDER, "rockit_cli.py")
 
 
 def main():
@@ -31,9 +33,9 @@ def main():
 	logging.info(f"> IPTS: {ipts}")
 
 	if DEBUG:
-		ipts_folder = f"/Users/j35/IPTS/HFIR/CG1D/{ipts}/"
+		ipts_folder = f"/Users/j35/HFIR/CG1D/IPTS-{ipts}/"
 	else:
-		ipts_folder = f"/HFIR/CG1D/{ipts}"
+		ipts_folder = f"/HFIR/CG1D/IPTS-{ipts}"
 	logging.info(f"input_folder: {ipts_folder}")
 	if not os.path.exists(ipts_folder):
 		logging.info(f"-> IPTS folder does not exist!")
@@ -51,12 +53,13 @@ def main():
 	# check the input_folder and list all the folders there
 	logging.info(f"> Retrieving the list of folders within {ct_scans_folder}!")
 	list_file_dir = glob.glob(os.path.join(ct_scans_folder, "*"))
-	logging.info(f"-> {len(list_file_dir)} folders/files were located")
 	list_dir = []
+	logging.info(f"-> {len(list_dir)} files/folders were located")
 	for _file_dir in list_file_dir:
 		if os.path.isdir(_file_dir):
 			list_dir.append(_file_dir)
-	logging.info(f"-> {len(list_dir)} folders were located")
+	for _dir in list_dir:
+		logging.info(f"--> {os.path.basename(_dir)}")
 
 	if len(list_dir) == 0:
 		logging.info(f"-> 0 folder found. clearing json_file. exit now!")
@@ -100,22 +103,22 @@ def main():
 	with open(JSON_FILE, 'w') as f:
 		json.dump(config, f)
 
-	# retrieve the list of tiff files in the new folders and for each, launch a reconstruction
+	# # retrieve the list of tiff files in the new folders and for each, launch a reconstruction
 	for _folder in list_new_folders:
-		list_tiff_files = glob.glob(os.path.join(_folder,"*.tif*"))
-		if list_tiff_files == []:
-			logging.info(f"No TIFF files found in {_folder}!")
-			logging.info(f"... Exiting autoreduction!")
-			return
+	# 	list_tiff_files = glob.glob(os.path.join(_folder,"*.tif*"))
+	# 	if list_tiff_files == []:
+	# 		logging.info(f"No TIFF files found in {_folder}!")
+	# 		logging.info(f"... Exiting autoreduction!")
+	# 		return
 
-		list_tiff_files.sort()
-		print(list_tiff_files)
+		# list_tiff_files.sort()
+		# print(list_tiff_files)
 
-		logging.info(f"> running {CMD}")
-		cmd = CMD + " " + " ".join(list_tiff_files)
+		cmd = f"{CMD} {ipts} {_folder}"
+		logging.info(f"> running {cmd}")
 		print(f"{cmd}")
-		# proc = subprocess.Popen(cmd, shell=True, stdin=subprocess.PIPE, universal_newlines=True)
-		# proc.communicate()
+		proc = subprocess.Popen(cmd, shell=True, stdin=subprocess.PIPE, universal_newlines=True)
+		proc.communicate()
 
 
 def is_folder_incomplete(folder):
