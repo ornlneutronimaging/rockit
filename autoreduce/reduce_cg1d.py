@@ -7,16 +7,18 @@ import subprocess
 
 DEBUG = True
 
-HOME_FOLDER = "/Users/j35/HFIR/CG1D/shared/autoreduce/"
+HOME_FOLDER = "/Users/j35/HFIR/CG1D/shared/autoreduce/"   # DEBUGGING
 # HOME_FOLDER = "/HFIR/CG1D/shared/autoreduce/"
+
+# IPTS_FOLDER = "/HFIR/CG1D/"
+IPTS_FOLDER = "/Users/j35/HFIR/CG1D/"    # DEBUGGING
+
 CMD_FOLDER = "/Users/j35/git/rockit/rockit/"
 
 CONFIG_FILE = os.path.join(HOME_FOLDER, "autoreduce_cg1d_config.yaml")
-JSON_FILE = os.path.join(HOME_FOLDER, "ct_scans_folder_processed.json")
+JSON_BASENAME = "ct_scans_folder_processed.json"
 LOG_FILE = os.path.join(HOME_FOLDER, "reduce_cg1d.log")
 
-# CMD = "python " + os.path.join(HOME_FOLDER, "recon_eval_demo_m0.py")
-#CMD = "python " + os.path.join(HOME_FOLDER, "recon_eval_demo_m1.py")
 CMD = "python " + os.path.join(CMD_FOLDER, "rockit_cli.py")
 
 
@@ -61,27 +63,29 @@ def main():
 	for _dir in list_dir:
 		logging.info(f"--> {os.path.basename(_dir)}")
 
+	json_file = os.path.join(IPTS_FOLDER + f"IPTS-{ipts}/shared/autoreduce/")
+
 	if len(list_dir) == 0:
 		logging.info(f"-> 0 folder found. clearing json_file. exit now!")
-		if os.path.exists(JSON_FILE):
-			os.remove(JSON_FILE)
-		logging.info(f"... Exiting autoreduction!")
+		if os.path.exists(json_file):
+			os.remove(json_file)
+		logging.info(f"... Exiting auto-reconstruction!")
 		return
 
-	if not os.path.exists(JSON_FILE):
+	if not os.path.exists(json_file):
 		# if first time retrieving folders
 		logging.info(f"> First time retrieving folders!")
 		list_folders_previously_loaded = []
 	else:
 		# loading list of folders previously recorded
-		with open(JSON_FILE) as f:
+		with open(json_file) as f:
 			config = json.load(f)
 
 		# checking that if we have the same number of folders, we are done here
 		list_folders_previously_loaded = config['list_folders']
 		if len(list_folders_previously_loaded) == len(list_dir):
 			logging.info(f"-> We still have the same number of folders, exit now!")
-			logging.info(f"... Exiting autoreduction!")
+			logging.info(f"... Exiting auto-reconstruction!")
 			return
 
 	# we have at least 1 new folder at this point
@@ -100,7 +104,7 @@ def main():
 
 	# update tmp file with new list of folders
 	config = {'list_folders': list_dir}
-	with open(JSON_FILE, 'w') as f:
+	with open(json_file, 'w') as f:
 		json.dump(config, f)
 
 	# # retrieve the list of tiff files in the new folders and for each, launch a reconstruction
