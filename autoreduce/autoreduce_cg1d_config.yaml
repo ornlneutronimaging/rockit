@@ -1,7 +1,9 @@
 DataPath:
   ipts : "23788"
 ROI:
+  mode: false
   xmin: 250
   ymin: 600
   xmax: 1250
   ymax: 1300
+autoreduction: true
