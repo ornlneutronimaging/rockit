@@ -13,7 +13,7 @@ from tomopy.prep.normalize import normalize_bg
 from tomopy.prep.stripe import remove_all_stripe
 
 import numpy as np
-import bm3d_streak_removal as bm3d_rmv
+# import bm3d_streak_removal as bm3d_rmv
 from imars3dv2.filters import tilt
 from utilites import get_ind_list, find_proj180_ind, read_tiff_stack, read_tiff_from_full_name_list, set_roi
 
@@ -22,12 +22,14 @@ warnings.filterwarnings('ignore')
 
 from samffr.retrieve_matching_ob_dc import RetrieveMatchingOBDC
 
+DEBUG = False
 
-#LOG_FILE_NAME = "/HFIR/CG1D/shared/autoreduce/rockit.log"
-LOG_FILE_NAME = "/Users/j35/HFIR/CG1D/shared/autoreduce/rockit.log"
-
-# TOP_FOLDER = "/HFIR/CG1D"
-TOP_FOLDER = "/Users/j35/HFIR/CG1D"
+if DEBUG:
+	LOG_FILE_NAME = "/Users/j35/HFIR/CG1D/shared/autoreduce/rockit.log"
+	TOP_FOLDER = "/HFIR/CG1D"
+else:
+	LOG_FILE_NAME = "/HFIR/CG1D/shared/autoreduce/rockit.log"
+	TOP_FOLDER = "/Users/j35/HFIR/CG1D"
 
 
 def main(args):
