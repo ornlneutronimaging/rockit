@@ -72,7 +72,7 @@ def main():
 	for _dir in list_dir:
 		logging.info(f"--> {os.path.basename(_dir)}")
 
-	json_file = ipts_folder + "/shared/autoreduce/"
+	json_file = ipts_folder + "/shared/autoreduce/" + JSON_BASENAME
 	logging.info(f"json_file: {json_file}")
 
 	if len(list_dir) == 0:
