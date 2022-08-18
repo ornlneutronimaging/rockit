@@ -46,7 +46,7 @@ def main():
 	ipts = yml_file['DataPath']['ipts']
 	logging.info(f"> IPTS: {ipts}")
 
-	ipts_folder = f"{IPTS_FOLDER}-{ipts}"
+	ipts_folder = f"{IPTS_FOLDER}IPTS-{ipts}"
 	logging.info(f"input_folder: {ipts_folder}")
 	if not os.path.exists(ipts_folder):
 		logging.info(f"-> IPTS folder does not exist!")
