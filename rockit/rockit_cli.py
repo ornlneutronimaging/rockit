@@ -25,11 +25,11 @@ from samffr.retrieve_matching_ob_dc import RetrieveMatchingOBDC
 DEBUG = False
 
 if DEBUG:
-	LOG_FILE_NAME = "/Users/j35/HFIR/CG1D/shared/autoreduce/rockit.log"
 	TOP_FOLDER = "/Users/j35/HFIR/CG1D"
 else:
-	LOG_FILE_NAME = "/HFIR/CG1D/shared/autoreduce/rockit.log"
 	TOP_FOLDER = "/HFIR/CG1D"
+
+LOG_EXTENSION = "_autoreduce.log"
 
 
 def main(args):
@@ -37,14 +37,19 @@ def main(args):
 	# parsing arguments
 	ipts_number = args.ipts_number
 	input_folder = args.input_folder
+
+	ipts_folder = os.path.join(TOP_FOLDER, f"IPTS-{ipts_number}/raw/")
+	reduction_log_folder = os.path.join(ipts_folder, "shared/autoreduce/reduction_log")
+	log_file_name = os.path.join(reduction_log_folder, os.path.basename(input_folder) + LOG_EXTENSION)
+
 	roi_xmin = args.roi_xmin if args.roi_xmin else None
 	roi_ymin = args.roi_ymin if args.roi_ymin else None
 	roi_xmax = args.roi_xmax if args.roi_xmax else None
 	roi_ymax = args.roi_ymax if args.roi_ymax else None
 	roi = [roi_xmin, roi_ymin, roi_xmax, roi_ymax]
 
-	print(f"LOG_FILE_NAME: {LOG_FILE_NAME}")
-	logging.basicConfig(filename=LOG_FILE_NAME,
+	print(f"LOG_FILE_NAME: {log_file_name}")
+	logging.basicConfig(filename=log_file_name,
 						filemode='w',
 						format='[%(levelname)s] - %(asctime)s - %(message)s',
 						level=logging.INFO)
@@ -76,7 +81,6 @@ def main(args):
 
 	print("looking for matching ob and dc")
 	logger.info(f"Looking for matching OB and DC!")
-	ipts_folder = os.path.join(TOP_FOLDER, f"IPTS-{ipts_number}/raw/")
 	logger.info(f"- ipts_folder: {ipts_folder}")
 	o_main = RetrieveMatchingOBDC(list_sample_data=list_sample_data,
 								  IPTS_folder=ipts_folder)
@@ -208,10 +212,10 @@ def main(args):
 	dxchange.write_tiff_stack(recon, fname=output_folder + 'reconstruction', overwrite=True)
 	logger.info(f"exporting the slices ... Done!")
 
-	# moving log file to output folder
-	logger.info(f"moving log file to output folder")
-	print(f"moving log from {LOG_FILE_NAME} to {output_folder}")
-	shutil.move(LOG_FILE_NAME, os.path.join(output_folder))
+	# # moving log file to output folder
+	# logger.info(f"moving log file to output folder")
+	# print(f"moving log from {log_file_name} to {output_folder}")
+	# shutil.move(log_file_name, os.path.join(output_folder))
 
 
 if __name__ == "__main__":
