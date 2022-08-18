@@ -47,7 +47,7 @@ def main():
 	logging.info(f"> IPTS: {ipts}")
 
 	ipts_folder = f"{IPTS_FOLDER}IPTS-{ipts}"
-	logging.info(f"input_folder: {ipts_folder}")
+	logging.info(f"ipts_folder: {ipts_folder}")
 	if not os.path.exists(ipts_folder):
 		logging.info(f"-> IPTS folder does not exist!")
 		logging.info(f"... Exiting auto-reconstruction!")
@@ -72,7 +72,7 @@ def main():
 	for _dir in list_dir:
 		logging.info(f"--> {os.path.basename(_dir)}")
 
-	json_file = os.path.join(ipts_folder, "/shared/autoreduce/")
+	json_file = os.path.join(os.path.abspath(ipts_folder), "/shared/autoreduce/")
 	logging.info(f"json_file: {json_file}")
 
 	if len(list_dir) == 0:
