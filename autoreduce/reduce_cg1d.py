@@ -65,14 +65,14 @@ def main():
 	logging.info(f"> Retrieving the list of folders within {ct_scans_folder}!")
 	list_file_dir = glob.glob(os.path.join(ct_scans_folder, "*"))
 	list_dir = []
-	logging.info(f"-> {len(list_dir)} files/folders were located")
+	logging.info(f"-> {len(list_file_dir)} files/folders were located")
 	for _file_dir in list_file_dir:
 		if os.path.isdir(_file_dir):
 			list_dir.append(_file_dir)
 	for _dir in list_dir:
 		logging.info(f"--> {os.path.basename(_dir)}")
 
-	json_file = os.path.join(os.path.abspath(ipts_folder), "/shared/autoreduce/")
+	json_file = ipts_folder + "/shared/autoreduce/"
 	logging.info(f"json_file: {json_file}")
 
 	if len(list_dir) == 0:
