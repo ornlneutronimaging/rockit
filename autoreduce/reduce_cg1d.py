@@ -73,6 +73,7 @@ def main():
 		logging.info(f"--> {os.path.basename(_dir)}")
 
 	json_file = os.path.join(ipts_folder, "/shared/autoreduce/")
+	logging.info(f"json_file: {json_file}")
 
 	if len(list_dir) == 0:
 		logging.info(f"-> 0 folder found. clearing json_file. exit now!")
