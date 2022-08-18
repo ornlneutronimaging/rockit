@@ -5,15 +5,22 @@ import glob
 import json
 import subprocess
 
-DEBUG = True
+DEBUG = False
 
-HOME_FOLDER = "/Users/j35/HFIR/CG1D/shared/autoreduce/"   # DEBUGGING
-# HOME_FOLDER = "/HFIR/CG1D/shared/autoreduce/"
+if DEBUG:
+	HOME_FOLDER = "/Users/j35/HFIR/CG1D/shared/autoreduce/"
+else:
+	HOME_FOLDER = "/HFIR/CG1D/shared/autoreduce/"
 
-# IPTS_FOLDER = "/HFIR/CG1D/"
-IPTS_FOLDER = "/Users/j35/HFIR/CG1D/"    # DEBUGGING
+if DEBUG:
+	IPTS_FOLDER = "/Users/j35/HFIR/CG1D/"
+else:
+	IPTS_FOLDER = "/HFIR/CG1D/"
 
-CMD_FOLDER = "/Users/j35/git/rockit/rockit/"
+if DEBUG:
+	CMD_FOLDER = "/Users/j35/git/rockit/rockit/"
+else:
+	CMD_FOLDER = "/SNS/users/j35/git/rockit/rockit/"
 
 CONFIG_FILE = os.path.join(HOME_FOLDER, "autoreduce_cg1d_config.yaml")
 JSON_BASENAME = "ct_scans_folder_processed.json"
@@ -25,7 +32,7 @@ CMD = "python " + os.path.join(CMD_FOLDER, "rockit_cli.py")
 def main():
 	if not os.path.exists(CONFIG_FILE):
 		logging.info(f"config file {CONFIG_FILE} does not exist!")
-		logging.info(f"... Exiting autoreduction!")
+		logging.info(f"... Exiting auto-reconstruction!")
 		return False
 
 	with open(CONFIG_FILE, 'r') as stream:
@@ -34,14 +41,11 @@ def main():
 	ipts = yml_file['DataPath']['ipts']
 	logging.info(f"> IPTS: {ipts}")
 
-	if DEBUG:
-		ipts_folder = f"/Users/j35/HFIR/CG1D/IPTS-{ipts}/"
-	else:
-		ipts_folder = f"/HFIR/CG1D/IPTS-{ipts}"
+	ipts_folder = f"{IPTS_FOLDER}-{ipts}"
 	logging.info(f"input_folder: {ipts_folder}")
 	if not os.path.exists(ipts_folder):
 		logging.info(f"-> IPTS folder does not exist!")
-		logging.info(f"... Exiting autoreduction!")
+		logging.info(f"... Exiting auto-reconstruction!")
 		return False
 
 	logging.info(f"-> IPTS folder has been located!")
@@ -49,7 +53,7 @@ def main():
 	ct_scans_folder = f"{ipts_folder}/raw/ct_scans/"
 	if not os.path.exists(ct_scans_folder):
 		logging.info(f"-> ct_scans folder does not exist!")
-		logging.info(f"... Exiting autoreduction!")
+		logging.info(f"... Exiting auto-reconstruction!")
 		return False
 
 	# check the input_folder and list all the folders there
@@ -63,7 +67,7 @@ def main():
 	for _dir in list_dir:
 		logging.info(f"--> {os.path.basename(_dir)}")
 
-	json_file = os.path.join(IPTS_FOLDER + f"IPTS-{ipts}/shared/autoreduce/")
+	json_file = os.path.join(ipts_folder, "/shared/autoreduce/")
 
 	if len(list_dir) == 0:
 		logging.info(f"-> 0 folder found. clearing json_file. exit now!")
@@ -98,7 +102,7 @@ def main():
 			logging.info(f"{_folder} is a new folder")
 			if is_folder_incomplete(_folder):
 				logging.info(f"-> this folder is not complete! Exit now!")
-				logging.info(f"... Exiting autoreduction!")
+				logging.info(f"... Exiting auto-reconstruction!")
 				return
 			list_new_folders.append(_folder)
 
@@ -109,15 +113,6 @@ def main():
 
 	# # retrieve the list of tiff files in the new folders and for each, launch a reconstruction
 	for _folder in list_new_folders:
-	# 	list_tiff_files = glob.glob(os.path.join(_folder,"*.tif*"))
-	# 	if list_tiff_files == []:
-	# 		logging.info(f"No TIFF files found in {_folder}!")
-	# 		logging.info(f"... Exiting autoreduction!")
-	# 		return
-
-		# list_tiff_files.sort()
-		# print(list_tiff_files)
-
 		cmd = f"{CMD} {ipts} {_folder}"
 		logging.info(f"> running {cmd}")
 		print(f"{cmd}")
