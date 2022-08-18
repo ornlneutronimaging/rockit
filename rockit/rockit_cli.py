@@ -26,10 +26,10 @@ DEBUG = False
 
 if DEBUG:
 	LOG_FILE_NAME = "/Users/j35/HFIR/CG1D/shared/autoreduce/rockit.log"
-	TOP_FOLDER = "/HFIR/CG1D"
+	TOP_FOLDER = "/Users/j35/HFIR/CG1D"
 else:
 	LOG_FILE_NAME = "/HFIR/CG1D/shared/autoreduce/rockit.log"
-	TOP_FOLDER = "/Users/j35/HFIR/CG1D"
+	TOP_FOLDER = "/HFIR/CG1D"
 
 
 def main(args):
