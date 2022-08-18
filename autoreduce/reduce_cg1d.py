@@ -30,6 +30,11 @@ CMD = "python " + os.path.join(CMD_FOLDER, "rockit_cli.py")
 
 
 def main():
+
+	logging.info(f"HOME_FOLDER: {HOME_FOLDER}")
+	logging.info(f"IPTS_FOLDER: {IPTS_FOLDER}")
+	logging.info(f"CMD_FOLDER: {CMD_FOLDER}")
+
 	if not os.path.exists(CONFIG_FILE):
 		logging.info(f"config file {CONFIG_FILE} does not exist!")
 		logging.info(f"... Exiting auto-reconstruction!")
