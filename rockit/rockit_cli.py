@@ -35,10 +35,10 @@ def main(args):
 	# parsing arguments
 	ipts_number = args.ipts_number
 	input_folder = args.input_folder
-	roi_xmin = args.roi_xmin if args.roi_xmin else 250
-	roi_ymin = args.roi_ymin if args.roi_ymin else 600
-	roi_xmax = args.roi_xmax if args.roi_xmax else 1250
-	roi_ymax = args.roi_ymax if args.roi_ymax else 1300
+	roi_xmin = args.roi_xmin if args.roi_xmin else None
+	roi_ymin = args.roi_ymin if args.roi_ymin else None
+	roi_xmax = args.roi_xmax if args.roi_xmax else None
+	roi_ymax = args.roi_ymax if args.roi_ymax else None
 	roi = [roi_xmin, roi_ymin, roi_xmax, roi_ymax]
 
 	print(f"LOG_FILE_NAME: {LOG_FILE_NAME}")
@@ -119,14 +119,26 @@ def main(args):
 	logger.info(f"Detecting and cropping the slits .... Done!")
 
 	# Define the ROI
-	print("removing slits aperture")
-	logger.info(f"removing slits aperture ...")
-	roi_corners = set_roi(corners=slit_box_corners, xmin=roi[0], ymin=roi[1], xmax=roi[2], ymax=roi[3])
-	logger.info(f"- corners detected are {roi_corners}")
-	proj_crop = remove_slits_aps_1id(proj, roi_corners)
-	ob_crop = remove_slits_aps_1id(ob, roi_corners)
-	dc_crop = remove_slits_aps_1id(dc, roi_corners)
-	logger.info(f"removing slits aperture ... Done!")
+	print("Cropping sample")
+	logger.info(f"cropping data ...")
+	if roi == [None, None, None, None]:
+		logger.info(f"-> nothing to crop!")
+		proj_crop = proj
+		ob_crop = ob
+		dc_crop = dc
+	else:
+		[height, width] = np.shape(proj[0])
+		xmin = roi[0] if roi[0] else 0
+		ymin = roi[1] if roi[1] else 0
+		xmax = roi[2] if roi[2] else width-1
+		ymax = roi[3] if roi[3] else height-1
+		logger.info(f"-> cropping using xmin:{xmin}, ymin:{ymin}, xmax:{xmax}, ymax:{ymax}")
+		roi_corners = set_roi(corners=slit_box_corners, xmin=xmin, ymin=ymin, xmax=xmax, ymax=ymax)
+		logger.info(f"- corners detected are {roi_corners}")
+		proj_crop = remove_slits_aps_1id(proj, roi_corners)
+		ob_crop = remove_slits_aps_1id(ob, roi_corners)
+		dc_crop = remove_slits_aps_1id(dc, roi_corners)
+	logger.info(f"cropping data ... Done!")
 
 	# Remove outliers
 	print("remove outliers")
