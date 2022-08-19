@@ -92,11 +92,17 @@ def main(args):
 	logger.info(f"Looking for matching OB and DC!")
 	logger.info(f"- raw_folder: {raw_folder}")
 	o_main = RetrieveMatchingOBDC(list_sample_data=list_sample_data,
-								  IPTS_folder=raw_folder)
+								  IPTS_folder=raw_folder,
+								  maximum_number_of_files_to_use=maximum_number_of_obs_to_use,
+								  maximum_time_offset= maximum_time_difference_between_sample_and_ob_acquisition)
 	o_main.run()
 
 	list_ob = o_main.get_matching_ob()
 	list_dc = o_main.get_matching_dc()
+
+	print(f"list_ob: {list_ob}")
+	return #REMOVE_ME
+
 
 	logger.info(f"- found {len(list_ob)} matching OB!")
 	logger.info(f"- found {len(list_dc)} matching DC!")
