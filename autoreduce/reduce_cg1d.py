@@ -5,7 +5,7 @@ import glob
 import json
 import subprocess
 
-DEBUG = False
+DEBUG = True
 
 if DEBUG:
 	HOME_FOLDER = "/Users/j35/HFIR/CG1D/shared/autoreduce/"
@@ -117,9 +117,46 @@ def main():
 	with open(json_file, 'w') as f:
 		json.dump(config, f)
 
+	# roi
+	roi_mode = yaml['ROI']['mode']
+	cmd_roi = ""
+	if roi_mode:
+
+		roi_xmax = yaml['ROI']['xmax']
+		if roi_xmax:
+			cmd_roi += f" -roi_xmax {roi_xmax}"
+
+		roi_xmin = yaml['ROI']['xmin']
+		if roi_xmin:
+			cmd_roi += f" -roi_xmin {roi_xmin}"
+
+		roi_ymin = yaml['ROI']['ymin']
+		if roi_ymin:
+			cmd_roi += f" -roi_ymin {roi_ymin}"
+
+		roi_ymax = yaml['ROI']['ymax']
+		if roi_ymax:
+			cmd_roi += f" -roi_ymax {roi_ymax}"
+
+	# ob auto selection
+	ob_auto_selection_mode = yaml['OB_auto_selection']['mode']
+	if not ob_auto_selection_mode:
+		cmd_ob = ""
+	else:
+		use_max_number_of_files = yaml['OB_auto_selection']['use_max_number_of_files']
+		if use_max_number_of_files:
+			max_number_of_ob_files = yaml['OB_auto_selection']['max_number_of_files']
+			cmd_ob = f"-maximum_number_of_obs {max_number_of_ob_files}"
+		else:
+			ob_days = yaml['OB_auto_selection']['days']
+			ob_minutes = yaml['OB_auto_selection']['minutes']
+			ob_hours = yaml['OB_auto_selection']['hours']
+			ob_minutes = (ob_days * 24 * 60) + ob_minutes + (ob_hours * 60)
+			cmd_ob = f"-maximum_time_difference_between_sample_and_ob_acquisition {ob_minutes}"
+
 	# # retrieve the list of tiff files in the new folders and for each, launch a reconstruction
 	for _folder in list_new_folders:
-		cmd = f"{CMD} {ipts} {_folder}"
+		cmd = f"{CMD} {cmd_ob} {cmd_roi} {cmd_roi} {ipts} {_folder}"
 		logging.info(f"> running {cmd}")
 		print(f"{cmd}")
 		proc = subprocess.Popen(cmd, shell=True, stdin=subprocess.PIPE, universal_newlines=True)
@@ -143,3 +180,6 @@ if __name__ == "__main__":
 						level=logging.INFO)
 	logging.info("*** Starting checking for new files - version 1.0")
 	main()
+
+
+# python rockit/rockit_cli.py 23788 /Users/j35/IPTS/HFIR/CG1D/IPTS-23788/raw/ct_scans/Aug24_2020

@@ -22,7 +22,7 @@ warnings.filterwarnings('ignore')
 
 from samffr.retrieve_matching_ob_dc import RetrieveMatchingOBDC
 
-DEBUG = False
+DEBUG = True
 
 if DEBUG:
 	TOP_FOLDER = "/Users/j35/HFIR/CG1D"
@@ -38,7 +38,8 @@ def main(args):
 	ipts_number = args.ipts_number
 	input_folder = args.input_folder
 
-	ipts_folder = os.path.join(TOP_FOLDER, f"IPTS-{ipts_number}/raw/")
+	ipts_folder = os.path.join(TOP_FOLDER, f"IPTS-{ipts_number}")
+	raw_folder = os.path.join(ipts_folder, 'raw')
 	reduction_log_folder = os.path.join(ipts_folder, "shared/autoreduce/reduction_log")
 	log_file_name = os.path.join(reduction_log_folder, os.path.basename(input_folder) + LOG_EXTENSION)
 
@@ -47,6 +48,11 @@ def main(args):
 	roi_xmax = args.roi_xmax if args.roi_xmax else None
 	roi_ymax = args.roi_ymax if args.roi_ymax else None
 	roi = [roi_xmin, roi_ymin, roi_xmax, roi_ymax]
+
+	maximum_number_of_obs_to_use = args.maximum_number_of_obs if args.maximum_number_of_obs else None
+	maximum_time_difference_between_sample_and_ob_acquisition = \
+		args.maximum_time_difference_between_sample_and_ob_acquisition if \
+			args.maximum_time_difference_between_sample_and_ob_acquisition else None
 
 	print(f"LOG_FILE_NAME: {log_file_name}")
 	logging.basicConfig(filename=log_file_name,
@@ -61,6 +67,9 @@ def main(args):
 	logger.info(f"roi_ymin: {roi_ymin}")
 	logger.info(f"roi_xmax: {roi_xmax}")
 	logger.info(f"roi_ymax: {roi_ymax}")
+	logger.info(f"max_number_of_obs_to_use: {maximum_number_of_obs_to_use}")
+	logger.info(f"maximum_time_difference_between_sample_and_ob_acquisition (mn): "
+				f"{maximum_time_difference_between_sample_and_ob_acquisition}")
 
 	# checking that input folder exists
 	if not os.path.exists(input_folder):
@@ -81,9 +90,9 @@ def main(args):
 
 	print("looking for matching ob and dc")
 	logger.info(f"Looking for matching OB and DC!")
-	logger.info(f"- ipts_folder: {ipts_folder}")
+	logger.info(f"- raw_folder: {raw_folder}")
 	o_main = RetrieveMatchingOBDC(list_sample_data=list_sample_data,
-								  IPTS_folder=ipts_folder)
+								  IPTS_folder=raw_folder)
 	o_main.run()
 
 	list_ob = o_main.get_matching_ob()
@@ -245,6 +254,12 @@ if __name__ == "__main__":
 	parser.add_argument('-roi_ymax',
 						type=int,
 						help='ymax ROI to crop')
+	parser.add_argument('-maximum_number_of_obs',
+						type=int,
+						help='Maximum number of OBs to use')
+	parser.add_argument('-maximum_time_difference_between_sample_and_ob_acquisition',
+						type=int,
+						help='Maximum time in minutes allowed between a sample and ob acquisition')
 
 	args = parser.parse_args()
 
