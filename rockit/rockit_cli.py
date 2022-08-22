@@ -88,21 +88,16 @@ def main(args):
 		logger.info(f"Input folder is empty. Leaving rockit now!")
 		exit(0)
 
-	print("looking for matching ob and dc")
 	logger.info(f"Looking for matching OB and DC!")
 	logger.info(f"- raw_folder: {raw_folder}")
 	o_main = RetrieveMatchingOBDC(list_sample_data=list_sample_data,
 								  IPTS_folder=raw_folder,
 								  maximum_number_of_files_to_use=maximum_number_of_obs_to_use,
-								  maximum_time_offset= maximum_time_difference_between_sample_and_ob_acquisition)
+								  maximum_time_offset_mn= maximum_time_difference_between_sample_and_ob_acquisition)
 	o_main.run()
 
 	list_ob = o_main.get_matching_ob()
 	list_dc = o_main.get_matching_dc()
-
-	print(f"list_ob: {list_ob}")
-	return #REMOVE_ME
-
 
 	logger.info(f"- found {len(list_ob)} matching OB!")
 	logger.info(f"- found {len(list_dc)} matching DC!")
@@ -205,7 +200,7 @@ def main(args):
 	print(f"center of rotation")
 	logger.info(f"center of rotation")
 	rot_center = find_center_pc(np.squeeze(proj_tilt[0, :, :]),
-					     		  np.squeeze(proj_tilt[proj180_ind, :, :]), tol=0.5)
+					     		np.squeeze(proj_tilt[proj180_ind, :, :]), tol=0.5)
 	logger.info(f"center of rotation ... Done!")
 
 	# reconstruction
