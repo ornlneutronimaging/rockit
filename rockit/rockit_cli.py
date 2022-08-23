@@ -160,7 +160,7 @@ def main(args):
         detect_end = datetime.now()
         logger.info(f"Detecting and cropping the slits .... Done in {detect_end - detect_start}!")
     else:
-        print("detecting and cropping the slits is OFF!")
+        print("detecting and cropping - SKIPPED")
         logger.info(f"Detecting and cropping the slits is OFF")
 
     # Define the ROI
@@ -231,7 +231,7 @@ def main(args):
         logger.info(f"ring artifact removal ... Done in {ring_end - ring_start}!")
     else:
         proj_rmv = proj_mlog
-        print("ring artifact removal skipped by user!")
+        print("ring artifact removal - SKIPPED")
         logger.info(f"ring artifact removal skipped by user!")
 
     # find and correct tilt
