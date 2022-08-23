@@ -1,9 +1,22 @@
 DataPath:
-  ipts : "23788"
+  ipts: 23788
 ROI:
   mode: false
-  xmin: 250
-  ymin: 600
-  xmax: 1250
-  ymax: 1300
+  xmax: null
+  xmin: null
+  ymax: null
+  ymin: null
 autoreduction: true
+ob_auto_selection:
+  days: 0
+  hours: 3
+  max_number_of_files: 12
+  minutes: 0
+  mode: true
+  use_max_number_of_files: true
+edge_cropping:
+  automatic: true
+ring_removal:
+  mode: true
+  algorithm: "Vos"
+  list_algorithm: ["Vos", "bm3d"]

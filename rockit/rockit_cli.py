@@ -1,4 +1,5 @@
 import argparse
+import copy
 import logging
 import os
 import glob
@@ -24,7 +25,7 @@ warnings.filterwarnings('ignore')
 
 from samffr.retrieve_matching_ob_dc import RetrieveMatchingOBDC
 
-DEBUG = False
+DEBUG = True
 
 if DEBUG:
     TOP_FOLDER = "/Users/j35/HFIR/CG1D"
@@ -52,6 +53,12 @@ def main(args):
     roi_xmax = args.roi_xmax if args.roi_xmax else None
     roi_ymax = args.roi_ymax if args.roi_ymax else None
     roi = [roi_xmin, roi_ymin, roi_xmax, roi_ymax]
+    ring_removal = args.ring_removal
+    if ring_removal is None:
+        ring_removal = True
+    automatic_edge_cropping = args.automatic_edge_cropping
+    if automatic_edge_cropping is None:
+        automatic_edge_cropping = True
 
     maximum_number_of_obs_to_use = args.maximum_number_of_obs if args.maximum_number_of_obs else None
     maximum_time_difference_between_sample_and_ob_acquisition = \
@@ -74,6 +81,8 @@ def main(args):
     logger.info(f"max_number_of_obs_to_use: {maximum_number_of_obs_to_use}")
     logger.info(f"maximum_time_difference_between_sample_and_ob_acquisition (mn): "
                 f"{maximum_time_difference_between_sample_and_ob_acquisition}")
+    logger.info(f"ring_removal: {ring_removal}")
+    logger.info(f"automatic_edge_cropping: {automatic_edge_cropping}")
 
     # checking that input folder exists
     if not os.path.exists(input_folder):
@@ -139,15 +148,20 @@ def main(args):
     logger.info(f"Loading DC ... Done in {loading_dc_end - loading_dc_start}!")
 
     # detect and crop the slits
-    detect_start = datetime.now()
-    print("detecting and cropping the slits")
-    logger.info(f"Detecting and cropping the slits ....")
-    slit_box_corners = find_slits_corners_aps_1id(img=ob[0], method='simple')
-    proj = remove_slits_aps_1id(proj, slit_box_corners)
-    ob = remove_slits_aps_1id(ob, slit_box_corners)
-    dc = remove_slits_aps_1id(dc, slit_box_corners)
-    detect_end = datetime.now()
-    logger.info(f"Detecting and cropping the slits .... Done in {detect_end - detect_start}!")
+    if automatic_edge_cropping:
+        detect_start = datetime.now()
+        print("detecting and cropping the slits")
+        logger.info(f"Detecting and cropping the slits ....")
+        slit_box_corners = find_slits_corners_aps_1id(img=ob[0], method='simple')
+        logger.info(f"-> slit_box_corners: {slit_box_corners}")
+        proj = remove_slits_aps_1id(proj, slit_box_corners)
+        ob = remove_slits_aps_1id(ob, slit_box_corners)
+        dc = remove_slits_aps_1id(dc, slit_box_corners)
+        detect_end = datetime.now()
+        logger.info(f"Detecting and cropping the slits .... Done in {detect_end - detect_start}!")
+    else:
+        print("detecting and cropping the slits is OFF!")
+        logger.info(f"Detecting and cropping the slits is OFF")
 
     # Define the ROI
     roi_start = datetime.now()
@@ -209,11 +223,16 @@ def main(args):
 
     # ring artifact removal
     ring_start = datetime.now()
-    print("ring artifact removal")
-    logger.info(f"ring artifact removal")
-    proj_rmv = remove_all_stripe(proj_mlog)
-    ring_end = datetime.now()
-    logger.info(f"ring artifact removal ... Done in {ring_end - ring_start}!")
+    if ring_removal:
+        print("ring artifact removal")
+        logger.info(f"ring artifact removal")
+        proj_rmv = remove_all_stripe(proj_mlog)
+        ring_end = datetime.now()
+        logger.info(f"ring artifact removal ... Done in {ring_end - ring_start}!")
+    else:
+        proj_rmv = proj_mlog
+        print("ring artifact removal skipped by user!")
+        logger.info(f"ring artifact removal skipped by user!")
 
     # find and correct tilt
     tilt_start = datetime.now()
@@ -298,6 +317,15 @@ if __name__ == "__main__":
     parser.add_argument('-maximum_time_difference_between_sample_and_ob_acquisition',
                         type=int,
                         help='Maximum time in minutes allowed between a sample and ob acquisition')
+    parser.add_argument('--automatic_edge_cropping',
+                        action=argparse.BooleanOptionalAction,
+                        help="activate or not the automatic edge cropping ")
+    parser.add_argument('--ring_removal',
+                        action=argparse.BooleanOptionalAction,
+                        help="Activate or not the ring removal algorithm")
+    parser.add_argument('-ring_removal_algorithm',
+                        type=str,
+                        help="Name of the ring removal algorithm [Vos, bm3d] (default being Vos)")
 
     args = parser.parse_args()
 
