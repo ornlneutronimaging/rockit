@@ -3,7 +3,7 @@ import logging
 import os
 import glob
 import shutil
-from datetime import datetime, timedelta
+from datetime import datetime
 
 import dxchange
 from tomopy import find_center_pc, circ_mask, normalize, minus_log
@@ -16,7 +16,7 @@ from tomopy.prep.stripe import remove_all_stripe
 import numpy as np
 # import bm3d_streak_removal as bm3d_rmv
 from imars3dv2.filters import tilt
-from .utilites import get_ind_list, find_proj180_ind, read_tiff_stack, read_tiff_from_full_name_list, set_roi
+from utilites import get_ind_list, find_proj180_ind, read_tiff_stack, read_tiff_from_full_name_list, set_roi
 
 import warnings
 
@@ -24,7 +24,7 @@ warnings.filterwarnings('ignore')
 
 from samffr.retrieve_matching_ob_dc import RetrieveMatchingOBDC
 
-DEBUG = True
+DEBUG = False
 
 if DEBUG:
     TOP_FOLDER = "/Users/j35/HFIR/CG1D"
