@@ -25,7 +25,7 @@ warnings.filterwarnings('ignore')
 
 from samffr.retrieve_matching_ob_dc import RetrieveMatchingOBDC
 
-DEBUG = True
+DEBUG = False
 
 if DEBUG:
     TOP_FOLDER = "/Users/j35/HFIR/CG1D"
