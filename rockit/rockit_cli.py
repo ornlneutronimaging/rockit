@@ -318,10 +318,12 @@ if __name__ == "__main__":
                         type=int,
                         help='Maximum time in minutes allowed between a sample and ob acquisition')
     parser.add_argument('--automatic_edge_cropping',
-                        action=argparse.BooleanOptionalAction,
+                        # action=argparse.BooleanOptionalAction,
+                        action="store_true",
                         help="activate or not the automatic edge cropping ")
     parser.add_argument('--ring_removal',
-                        action=argparse.BooleanOptionalAction,
+                        action="store_true",
+                        # action=argparse.BooleanOptionalAction,
                         help="Activate or not the ring removal algorithm")
     parser.add_argument('-ring_removal_algorithm',
                         type=str,
