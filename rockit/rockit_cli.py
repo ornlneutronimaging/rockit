@@ -134,7 +134,7 @@ def main(args):
     # ob
     loading_ob_start = datetime.now()
     print("loading ob")
-    logger.info(f"Loading OB ....")
+    logger.info(f"Loading OB ({len(list_ob)} files) ....")
     ob = read_tiff_from_full_name_list(list_ob)
     loading_ob_end = datetime.now()
     logger.info(f"Loading OB .... Done in {loading_ob_end - loading_ob_start}!")
@@ -142,7 +142,7 @@ def main(args):
     # dc
     loading_dc_start = datetime.now()
     print("loading dc")
-    logger.info(f"Loading DC ...")
+    logger.info(f"Loading DC ({len(list_dc)} files) ...")
     dc = read_tiff_from_full_name_list(list_dc)
     loading_dc_end = datetime.now()
     logger.info(f"Loading DC ... Done in {loading_dc_end - loading_dc_start}!")
@@ -278,6 +278,8 @@ def main(args):
     full_process_end_time = datetime.now()
     full_process_delta_time = full_process_end_time - full_process_start_time
     logger.info(f"Full CT reconstruction took {full_process_delta_time}")
+
+    logger.info(f"RECONSTRUCTION WAS SUCCESSFUL!")
 
 # # moving log file to output folder
 # logger.info(f"moving log file to output folder")
