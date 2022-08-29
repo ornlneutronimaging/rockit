@@ -6,7 +6,7 @@ import json
 import subprocess
 
 DEBUG = True
-LOG_FILE_MAX_LINES_NUMBER = 500
+LOG_FILE_MAX_LINES_NUMBER = 3000
 
 if DEBUG:
 	HOME_FOLDER = "/Users/j35/HFIR/CG1D/shared/autoreduce/"
