@@ -26,6 +26,8 @@ warnings.filterwarnings('ignore')
 from samffr.retrieve_matching_ob_dc import RetrieveMatchingOBDC
 
 DEBUG = False
+SUCCESSFUL_MESSAGE = "RECONSTRUCTION WAS SUCCESSFUL!"
+
 
 if DEBUG:
     TOP_FOLDER = "/Users/j35/HFIR/CG1D"
@@ -279,7 +281,7 @@ def main(args):
     full_process_delta_time = full_process_end_time - full_process_start_time
     logger.info(f"Full CT reconstruction took {full_process_delta_time}")
 
-    logger.info(f"RECONSTRUCTION WAS SUCCESSFUL!")
+    logger.info(f"{SUCCESSFUL_MESSAGE}")
 
 # # moving log file to output folder
 # logger.info(f"moving log file to output folder")

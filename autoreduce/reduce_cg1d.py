@@ -6,6 +6,7 @@ import json
 import subprocess
 
 DEBUG = True
+LOG_FILE_MAX_LINES_NUMBER = 500
 
 if DEBUG:
 	HOME_FOLDER = "/Users/j35/HFIR/CG1D/shared/autoreduce/"
@@ -30,6 +31,16 @@ CMD = "python " + os.path.join(CMD_FOLDER, "rockit_cli.py")
 
 
 def main():
+
+	# clean up log file
+	with open(CONFIG_FILE, 'r') as config_file:
+		config_file_content = config_file.readlines()
+
+	if len(config_file_content) > LOG_FILE_MAX_LINES_NUMBER:
+		config_file_content = config_file_content[-LOG_FILE_MAX_LINES_NUMBER:]
+
+	with open(CONFIG_FILE, 'w') as config_file:
+		config_file.writelines(config_file_content)
 
 	logging.info(f"HOME_FOLDER: {HOME_FOLDER}")
 	logging.info(f"IPTS_FOLDER: {IPTS_FOLDER}")
