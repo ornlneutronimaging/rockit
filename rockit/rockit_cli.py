@@ -25,7 +25,7 @@ warnings.filterwarnings('ignore')
 
 from samffr.retrieve_matching_ob_dc import RetrieveMatchingOBDC
 
-DEBUG = True
+DEBUG = False
 SUCCESSFUL_MESSAGE = "RECONSTRUCTION WAS SUCCESSFUL!"
 
 
@@ -125,8 +125,8 @@ def main(args):
     # if no ob or dc found, stop here
     if (len(list_ob) == 0) or (len(list_dc) == 0):
         logger.info(f"Some OB and DC are missing, the reconstruction will stop now!")
-        logger.info(f"Consult the sample, ob and dc metadata json file for more information! "
-                    f"(found in the same output folder")
+        logger.info(f"Consult the sample, ob and dc metadata json file for more information!"
+                    f"(found in the same output folder) or by clicking the button >Preview metadata of files ...<")
 
         # export a sample_ob_dc_metadata.json file that will show the not matching parameters
         sample_metadata_dict = o_main.sample_metadata_dict
