@@ -20,3 +20,4 @@ ring_removal:
   mode: true
   algorithm: "Vos"
   list_algorithm: ["Vos", "bm3d"]
+acquisition_time_coefficient: 5

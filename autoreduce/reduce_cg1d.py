@@ -4,6 +4,8 @@ import logging
 import glob
 import json
 import subprocess
+import time
+from PIL import Image
 
 DEBUG = True
 LOG_FILE_MAX_LINES_NUMBER = 3000
@@ -114,13 +116,14 @@ def main():
 
 	# retrieving the list of new folders
 	list_new_folders = []
+	acquisition_time_coefficient = yml_file['acquisition_time_coefficient']
 	for _folder in list_dir:
 		if not (_folder in list_folders_previously_loaded):
 			logging.info(f"{_folder} is a new folder")
-			if is_folder_incomplete(_folder):
+			if is_folder_incomplete(_folder, acquisition_time_coefficient=acquisition_time_coefficient):
 				logging.info(f"-> this folder is not complete! Exit now!")
 				logging.info(f"... Exiting auto-reconstruction!")
-				return
+				continue
 			list_new_folders.append(_folder)
 
 	# update tmp file with new list of folders
@@ -174,8 +177,45 @@ def main():
 		proc.communicate()
 
 
-def is_folder_incomplete(folder):
-	return False    # for now, let's consider the folder always complete!
+def is_folder_incomplete(folder, acquisition_time_coefficient=5):
+	"""this is where we are checking that
+	current_time_stamp > last_image_time_stamp + coeff * images_acquisition_time
+	"""
+
+	# list all tiff from this folder
+	list_tiff = glob.glob(os.path.join(folder, "*.tif*"))
+	if len(list_tiff) == 0:
+		return True
+
+	# sort by name and use the last one
+	list_tiff.sort()
+	last_image = list_tiff[-1]
+
+	# get time_stamp
+	last_image_time_stamp = os.path.getatime(last_image)
+
+	# find out acquisition time for that file
+	o_image = Image.open(last_image_time_stamp)
+	o_dict = dict(o_image.tag_v2)
+	acquisition_metadata = o_dict[65027]
+	name, value = acquisition_metadata.split(":")
+	acquisition_time = float(value)
+
+	# get current time_stamp
+	current_time_stamp = time.time()
+
+	# if (current_time_stamp > last_image_time_stamp + acquisition_time_coefficient * image_acquisition_time)
+	#     return False
+	# else:
+	#     return True
+	if current_time_stamp > (last_image_time_stamp + acquisition_time_coefficient * acquisition_time):
+		return False
+	else:
+		logging.info(f"-> current_time_stamp: {current_time_stamp}")
+		logging.info(f"-> last_image_time_stamp: {last_image_time_stamp}")
+		logging.info(f"-> image_acquisition_time: {acquisition_time}")
+		logging.info(f"-> acquisition_time_coefficient: {acquisition_time_coefficient}")
+		return True
 
 
 def read_ascii(file_name):
