@@ -5,7 +5,7 @@ import os
 import glob
 import tomopy
 # import svmbir
-import bm3d_streak_removal as bm3d_rmv
+# import bm3d_streak_removal as bm3d_rmv
 
 def get_ind_list(name_list: list):
 	ind = []
@@ -163,11 +163,11 @@ def load_dc(fdir, name="dc*"):
 
 
 def remove_ring(proj, algorithm="Vo"):
-    if algorithm == "Vo":
-        proj_rmv = tomopy.prep.stripe.remove_all_stripe(proj)
-    elif algorithm == "bm3d":
-        proj_norm = bm3d_rmv.extreme_streak_attenuation(proj)
-        proj_rmv = bm3d_rmv.multiscale_streak_removal(proj_norm)
+    #if algorithm == "Vo":
+    proj_rmv = tomopy.prep.stripe.remove_all_stripe(proj)
+    # elif algorithm == "bm3d":
+    #     proj_norm = bm3d_rmv.extreme_streak_attenuation(proj)
+    #     proj_rmv = bm3d_rmv.multiscale_streak_removal(proj_norm)
     return proj_rmv
 
 
