@@ -7,7 +7,7 @@ import subprocess
 import time
 from PIL import Image
 
-DEBUG = True
+DEBUG = False
 LOG_FILE_MAX_LINES_NUMBER = 3000
 
 if DEBUG:
