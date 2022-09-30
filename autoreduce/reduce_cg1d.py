@@ -7,7 +7,7 @@ import subprocess
 import time
 from PIL import Image
 
-DEBUG = False
+DEBUG = True
 LOG_FILE_MAX_LINES_NUMBER = 3000
 
 if DEBUG:
@@ -132,39 +132,39 @@ def main():
 		json.dump(config, f)
 
 	# roi
-	roi_mode = yaml['ROI']['mode']
+	roi_mode = yml_file['ROI']['mode']
 	cmd_roi = ""
 	if roi_mode:
 
-		roi_xmax = yaml['ROI']['xmax']
+		roi_xmax = yml_file['ROI']['xmax']
 		if roi_xmax:
 			cmd_roi += f" -roi_xmax {roi_xmax}"
 
-		roi_xmin = yaml['ROI']['xmin']
+		roi_xmin = yml_file['ROI']['xmin']
 		if roi_xmin:
 			cmd_roi += f" -roi_xmin {roi_xmin}"
 
-		roi_ymin = yaml['ROI']['ymin']
+		roi_ymin = yml_file['ROI']['ymin']
 		if roi_ymin:
 			cmd_roi += f" -roi_ymin {roi_ymin}"
 
-		roi_ymax = yaml['ROI']['ymax']
+		roi_ymax = yml_file['ROI']['ymax']
 		if roi_ymax:
 			cmd_roi += f" -roi_ymax {roi_ymax}"
 
 	# ob auto selection
-	ob_auto_selection_mode = yaml['OB_auto_selection']['mode']
+	ob_auto_selection_mode = yml_file['ob_auto_selection']['mode']
 	if not ob_auto_selection_mode:
 		cmd_ob = ""
 	else:
-		use_max_number_of_files = yaml['OB_auto_selection']['use_max_number_of_files']
+		use_max_number_of_files = yml_file['ob_auto_selection']['use_max_number_of_files']
 		if use_max_number_of_files:
-			max_number_of_ob_files = yaml['OB_auto_selection']['max_number_of_files']
+			max_number_of_ob_files = yml_file['ob_auto_selection']['max_number_of_files']
 			cmd_ob = f"-maximum_number_of_obs {max_number_of_ob_files}"
 		else:
-			ob_days = yaml['OB_auto_selection']['days']
-			ob_minutes = yaml['OB_auto_selection']['minutes']
-			ob_hours = yaml['OB_auto_selection']['hours']
+			ob_days = yml_file['ob_auto_selection']['days']
+			ob_minutes = yml_file['ob_auto_selection']['minutes']
+			ob_hours = yml_file['ob_auto_selection']['hours']
 			ob_minutes = (ob_days * 24 * 60) + ob_minutes + (ob_hours * 60)
 			cmd_ob = f"-maximum_time_difference_between_sample_and_ob_acquisition {ob_minutes}"
 
@@ -195,7 +195,8 @@ def is_folder_incomplete(folder, acquisition_time_coefficient=5):
 	last_image_time_stamp = os.path.getatime(last_image)
 
 	# find out acquisition time for that file
-	o_image = Image.open(last_image_time_stamp)
+
+	o_image = Image.open(last_image)
 	o_dict = dict(o_image.tag_v2)
 	acquisition_metadata = o_dict[65027]
 	name, value = acquisition_metadata.split(":")
