@@ -4,7 +4,7 @@ import numpy as np
 import os
 import glob
 import tomopy
-import svmbir
+# import svmbir
 import bm3d_streak_removal as bm3d_rmv
 
 def get_ind_list(name_list: list):
@@ -172,20 +172,20 @@ def remove_ring(proj, algorithm="Vo"):
 
 
 def recon(proj, theta, rot_center, algorithm="gridrec"):
-    if algorithm == "svMBIR":
-        # T, P, sharpness, snr_db: parameters of reconstruction, usually keep fixed. (Can be played with)
-        T = 2.0
-        p = 1.2
-        sharpness = 0.0
-        snr_db = 30.0
-        center_offset= -(proj.shape[2]/2 - rot_center)
-        recon = svmbir.recon(proj, angles=theta, weight_type='transmission',
-                             center_offset=center_offset, 
-                             snr_db=snr_db, p=p, T=T, sharpness=sharpness, 
-                             positivity=False, max_iterations=100, 
-                             num_threads= 112, verbose=0) # verbose: display of reconstruction: 0 is minimum, 1 is regular
-    else:
-        recon = tomopy.recon(proj, theta, center=rot_center, algorithm=algorithm, sinogram_order=False)
+    # if algorithm == "svMBIR":
+    #     # T, P, sharpness, snr_db: parameters of reconstruction, usually keep fixed. (Can be played with)
+    #     T = 2.0
+    #     p = 1.2
+    #     sharpness = 0.0
+    #     snr_db = 30.0
+    #     center_offset= -(proj.shape[2]/2 - rot_center)
+    #     recon = svmbir.recon(proj, angles=theta, weight_type='transmission',
+    #                          center_offset=center_offset,
+    #                          snr_db=snr_db, p=p, T=T, sharpness=sharpness,
+    #                          positivity=False, max_iterations=100,
+    #                          num_threads= 112, verbose=0) # verbose: display of reconstruction: 0 is minimum, 1 is regular
+    # else:
+    recon = tomopy.recon(proj, theta, center=rot_center, algorithm=algorithm, sinogram_order=False)
     recon = tomopy.circ_mask(recon, axis=0, ratio=1)
     return recon
         
