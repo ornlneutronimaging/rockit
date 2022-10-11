@@ -1,5 +1,5 @@
 import argparse
-import copy
+import json
 import logging
 import os
 import glob
@@ -26,6 +26,8 @@ warnings.filterwarnings('ignore')
 from samffr.retrieve_matching_ob_dc import RetrieveMatchingOBDC
 
 DEBUG = False
+SUCCESSFUL_MESSAGE = "RECONSTRUCTION WAS SUCCESSFUL!"
+
 
 if DEBUG:
     TOP_FOLDER = "/Users/j35/HFIR/CG1D"
@@ -33,6 +35,7 @@ else:
     TOP_FOLDER = "/HFIR/CG1D"
 
 LOG_EXTENSION = "_autoreduce.log"
+METADATA_JSON = "_sample_ob_dc_metadata.json"
 
 
 def main(args):
@@ -47,6 +50,7 @@ def main(args):
     raw_folder = os.path.join(ipts_folder, 'raw')
     reduction_log_folder = os.path.join(ipts_folder, "shared/autoreduce/reduction_log")
     log_file_name = os.path.join(reduction_log_folder, os.path.basename(input_folder) + LOG_EXTENSION)
+    sample_ob_dc_metadata_json = os.path.join(reduction_log_folder, os.path.basename(input_folder) + METADATA_JSON)
 
     roi_xmin = args.roi_xmin if args.roi_xmin else None
     roi_ymin = args.roi_ymin if args.roi_ymin else None
@@ -118,6 +122,30 @@ def main(args):
     matching_files_end = datetime.now()
     logger.info(f"Looking for matching OB and DC took {matching_files_end - matching_files_start}")
 
+    # if no ob or dc found, stop here
+    if (len(list_ob) == 0) or (len(list_dc) == 0):
+        logger.info(f"Some OB and DC are missing, the reconstruction will stop now!")
+        logger.info(f"Consult the sample, ob and dc metadata json file for more information!"
+                    f"(found in the same output folder) or by clicking the button >Preview metadata of files ...<")
+
+        # export a sample_ob_dc_metadata.json file that will show the not matching parameters
+        sample_metadata_dict = o_main.sample_metadata_dict
+        list_key = list(sample_metadata_dict.keys())
+        first_sample_metadata_dict = sample_metadata_dict[list_key[0]]
+
+        ob_metadata_dict = o_main.ob_metadata_dict
+        dc_metadata_dict = o_main.dc_metadata_dict
+
+        metadata_dict = {'sample': first_sample_metadata_dict,
+                         'ob': ob_metadata_dict,
+                         'dc': dc_metadata_dict}
+
+        import json
+        with open(sample_ob_dc_metadata_json, 'w') as outfile:
+            json.dump(metadata_dict, outfile)
+
+        return
+
     # build script to run yuxuan's code
 
     # projections
@@ -134,7 +162,7 @@ def main(args):
     # ob
     loading_ob_start = datetime.now()
     print("loading ob")
-    logger.info(f"Loading OB ....")
+    logger.info(f"Loading OB ({len(list_ob)} files) ....")
     ob = read_tiff_from_full_name_list(list_ob)
     loading_ob_end = datetime.now()
     logger.info(f"Loading OB .... Done in {loading_ob_end - loading_ob_start}!")
@@ -142,7 +170,7 @@ def main(args):
     # dc
     loading_dc_start = datetime.now()
     print("loading dc")
-    logger.info(f"Loading DC ...")
+    logger.info(f"Loading DC ({len(list_dc)} files) ...")
     dc = read_tiff_from_full_name_list(list_dc)
     loading_dc_end = datetime.now()
     logger.info(f"Loading DC ... Done in {loading_dc_end - loading_dc_start}!")
@@ -281,10 +309,7 @@ def main(args):
     full_process_delta_time = full_process_end_time - full_process_start_time
     logger.info(f"Full CT reconstruction took {full_process_delta_time}")
 
-# # moving log file to output folder
-# logger.info(f"moving log file to output folder")
-# print(f"moving log from {log_file_name} to {output_folder}")
-# shutil.move(log_file_name, os.path.join(output_folder))
+    logger.info(f"{SUCCESSFUL_MESSAGE}")
 
 
 if __name__ == "__main__":
@@ -320,10 +345,12 @@ if __name__ == "__main__":
                         type=int,
                         help='Maximum time in minutes allowed between a sample and ob acquisition')
     parser.add_argument('--automatic_edge_cropping',
-                        action=argparse.BooleanOptionalAction,
+                        # action=argparse.BooleanOptionalAction,
+                        action="store_true",
                         help="activate or not the automatic edge cropping ")
     parser.add_argument('--ring_removal',
-                        action=argparse.BooleanOptionalAction,
+                        action="store_true",
+                        # action=argparse.BooleanOptionalAction,
                         help="Activate or not the ring removal algorithm")
     parser.add_argument('-ring_removal_algorithm',
                         type=str,

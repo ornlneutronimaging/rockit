@@ -4,8 +4,11 @@ import logging
 import glob
 import json
 import subprocess
+import time
+from PIL import Image
 
-DEBUG = True
+DEBUG = False
+LOG_FILE_MAX_LINES_NUMBER = 3000
 
 if DEBUG:
 	HOME_FOLDER = "/Users/j35/HFIR/CG1D/shared/autoreduce/"
@@ -30,6 +33,16 @@ CMD = "python " + os.path.join(CMD_FOLDER, "rockit_cli.py")
 
 
 def main():
+
+	# clean up log file
+	with open(CONFIG_FILE, 'r') as config_file:
+		config_file_content = config_file.readlines()
+
+	if len(config_file_content) > LOG_FILE_MAX_LINES_NUMBER:
+		config_file_content = config_file_content[-LOG_FILE_MAX_LINES_NUMBER:]
+
+	with open(CONFIG_FILE, 'w') as config_file:
+		config_file.writelines(config_file_content)
 
 	logging.info(f"HOME_FOLDER: {HOME_FOLDER}")
 	logging.info(f"IPTS_FOLDER: {IPTS_FOLDER}")
@@ -103,13 +116,14 @@ def main():
 
 	# retrieving the list of new folders
 	list_new_folders = []
+	acquisition_time_coefficient = yml_file['acquisition_time_coefficient']
 	for _folder in list_dir:
 		if not (_folder in list_folders_previously_loaded):
 			logging.info(f"{_folder} is a new folder")
-			if is_folder_incomplete(_folder):
+			if is_folder_incomplete(_folder, acquisition_time_coefficient=acquisition_time_coefficient):
 				logging.info(f"-> this folder is not complete! Exit now!")
 				logging.info(f"... Exiting auto-reconstruction!")
-				return
+				continue
 			list_new_folders.append(_folder)
 
 	# update tmp file with new list of folders
@@ -118,39 +132,39 @@ def main():
 		json.dump(config, f)
 
 	# roi
-	roi_mode = yaml['ROI']['mode']
+	roi_mode = yml_file['ROI']['mode']
 	cmd_roi = ""
 	if roi_mode:
 
-		roi_xmax = yaml['ROI']['xmax']
+		roi_xmax = yml_file['ROI']['xmax']
 		if roi_xmax:
 			cmd_roi += f" -roi_xmax {roi_xmax}"
 
-		roi_xmin = yaml['ROI']['xmin']
+		roi_xmin = yml_file['ROI']['xmin']
 		if roi_xmin:
 			cmd_roi += f" -roi_xmin {roi_xmin}"
 
-		roi_ymin = yaml['ROI']['ymin']
+		roi_ymin = yml_file['ROI']['ymin']
 		if roi_ymin:
 			cmd_roi += f" -roi_ymin {roi_ymin}"
 
-		roi_ymax = yaml['ROI']['ymax']
+		roi_ymax = yml_file['ROI']['ymax']
 		if roi_ymax:
 			cmd_roi += f" -roi_ymax {roi_ymax}"
 
 	# ob auto selection
-	ob_auto_selection_mode = yaml['OB_auto_selection']['mode']
+	ob_auto_selection_mode = yml_file['ob_auto_selection']['mode']
 	if not ob_auto_selection_mode:
 		cmd_ob = ""
 	else:
-		use_max_number_of_files = yaml['OB_auto_selection']['use_max_number_of_files']
+		use_max_number_of_files = yml_file['ob_auto_selection']['use_max_number_of_files']
 		if use_max_number_of_files:
-			max_number_of_ob_files = yaml['OB_auto_selection']['max_number_of_files']
+			max_number_of_ob_files = yml_file['ob_auto_selection']['max_number_of_files']
 			cmd_ob = f"-maximum_number_of_obs {max_number_of_ob_files}"
 		else:
-			ob_days = yaml['OB_auto_selection']['days']
-			ob_minutes = yaml['OB_auto_selection']['minutes']
-			ob_hours = yaml['OB_auto_selection']['hours']
+			ob_days = yml_file['ob_auto_selection']['days']
+			ob_minutes = yml_file['ob_auto_selection']['minutes']
+			ob_hours = yml_file['ob_auto_selection']['hours']
 			ob_minutes = (ob_days * 24 * 60) + ob_minutes + (ob_hours * 60)
 			cmd_ob = f"-maximum_time_difference_between_sample_and_ob_acquisition {ob_minutes}"
 
@@ -163,8 +177,46 @@ def main():
 		proc.communicate()
 
 
-def is_folder_incomplete(folder):
-	return False    # for now, let's consider the folder always complete!
+def is_folder_incomplete(folder, acquisition_time_coefficient=5):
+	"""this is where we are checking that
+	current_time_stamp > last_image_time_stamp + coeff * images_acquisition_time
+	"""
+
+	# list all tiff from this folder
+	list_tiff = glob.glob(os.path.join(folder, "*.tif*"))
+	if len(list_tiff) == 0:
+		return True
+
+	# sort by name and use the last one
+	list_tiff.sort()
+	last_image = list_tiff[-1]
+
+	# get time_stamp
+	last_image_time_stamp = os.path.getatime(last_image)
+
+	# find out acquisition time for that file
+
+	o_image = Image.open(last_image)
+	o_dict = dict(o_image.tag_v2)
+	acquisition_metadata = o_dict[65027]
+	name, value = acquisition_metadata.split(":")
+	acquisition_time = float(value)
+
+	# get current time_stamp
+	current_time_stamp = time.time()
+
+	# if (current_time_stamp > last_image_time_stamp + acquisition_time_coefficient * image_acquisition_time)
+	#     return False
+	# else:
+	#     return True
+	if current_time_stamp > (last_image_time_stamp + acquisition_time_coefficient * acquisition_time):
+		return False
+	else:
+		logging.info(f"-> current_time_stamp: {current_time_stamp}")
+		logging.info(f"-> last_image_time_stamp: {last_image_time_stamp}")
+		logging.info(f"-> image_acquisition_time: {acquisition_time}")
+		logging.info(f"-> acquisition_time_coefficient: {acquisition_time_coefficient}")
+		return True
 
 
 def read_ascii(file_name):

@@ -44,8 +44,6 @@ METADATA_KEYS = {'ob' : [MetadataName.EXPOSURE_TIME,
 
 class MetadataHandler:
 
-
-
     @staticmethod
     def retrieve_metadata(list_of_files=None, display_infos=False, label=""):
         """
