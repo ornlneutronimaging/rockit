@@ -15,7 +15,7 @@ from tomopy.prep.normalize import normalize_bg
 from tomopy.prep.stripe import remove_all_stripe
 
 import numpy as np
-# import bm3d_streak_removal as bm3d_rmv
+import bm3d_streak_removal as bm3d_rmv
 from imars3dv2.filters import tilt
 from utilites import get_ind_list, find_proj180_ind, read_tiff_stack, read_tiff_from_full_name_list, set_roi
 
@@ -225,8 +225,10 @@ def main(args):
     ring_start = datetime.now()
     if ring_removal:
         print("ring artifact removal")
-        logger.info(f"ring artifact removal")
-        proj_rmv = remove_all_stripe(proj_mlog)
+        logger.info(f"ring artifact removal using bm3d!")
+        proj_bm3d_norm = bm3d_rmv.extreme_streak_attenuation(proj_mlog)
+        proj_rmv = bm3d_rmv.multiscale_streak_removal(proj_bm3d_norm)
+        # proj_rmv = remove_all_stripe(proj_mlog)
         ring_end = datetime.now()
         logger.info(f"ring artifact removal ... Done in {ring_end - ring_start}!")
     else:
