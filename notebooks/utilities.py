@@ -156,7 +156,7 @@ def load_ct(fdir, ang1=0, ang2=360, name="raw*"):
         ct_list = glob.glob(fdir+"/"+name)
         ct_name, idx_list = get_list(ct_list)
         ang_rad = tomopy.angles(len(idx_list), ang1=ang1, ang2=ang2) # Default 360 degree rotation
-        ang_deg = np.rad2deg(theta)
+        ang_deg = np.rad2deg(ang_rad)
     proj180_ind = find_idx_by_ang(ang_deg, 180)
     proj000_ind = find_idx_by_ang(ang_deg, 0)
     print('Found index of 180 degree projections: {} of angle {}'.format(proj180_ind[0], proj180_ind[1]))
