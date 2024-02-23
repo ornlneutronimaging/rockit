@@ -4,6 +4,7 @@ import numpy as np
 import os
 import glob
 import tomopy
+import json
 # import svmbir
 # import bm3d_streak_removal as bm3d_rmv
 
@@ -189,3 +190,26 @@ def recon(proj, theta, rot_center, algorithm="gridrec"):
     recon = tomopy.circ_mask(recon, axis=0, ratio=1)
     return recon
         
+
+def load_json(json_file):
+	"""returns the content of the json file"""
+	if not os.path.exists(json_file):
+		return None
+
+	with open(json_file, 'r') as f:
+		return json.load(f)
+
+
+def find_tags_with_name_recursive(dictionary, name, found_tags=None):
+
+    if found_tags is None:
+        found_tags = []
+
+    for key, value in dictionary.items():
+        if key == name:
+            found_tags.append(key)
+
+        if isinstance(value, dict):
+            find_tags_with_name_recursive(value, name, found_tags)
+
+    return found_tags
