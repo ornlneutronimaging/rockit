@@ -4,7 +4,7 @@ import os
 import glob
 from datetime import datetime
 
-from utilites import load_json
+from utilites import load_json, save_json, replace_value_of_tags, create_json_config_file_name
 
 import warnings
 
@@ -21,7 +21,7 @@ if DEBUG:
 else:
     TOP_FOLDER = "/HFIR/CG1D"
 
-LOG_EXTENSION = "_autoreduce.log"
+LOG_EXTENSION = "_imars3d_autoreduce.log"
 METADATA_JSON = "_sample_ob_dc_metadata.json"
 
 if DEBUG:
@@ -31,8 +31,6 @@ else:
 
 
 def main(args):
-
-    full_process_start_time = datetime.now()
 
     # parsing arguments
     ipts_number = args.ipts_number
@@ -48,7 +46,6 @@ def main(args):
     roi_ymin = args.roi_ymin if args.roi_ymin else None
     roi_xmax = args.roi_xmax if args.roi_xmax else None
     roi_ymax = args.roi_ymax if args.roi_ymax else None
-    roi = [roi_xmin, roi_ymin, roi_xmax, roi_ymax]
     ring_removal = args.ring_removal
     if ring_removal is None:
         ring_removal = True
@@ -161,14 +158,22 @@ def main(args):
                                                   'dc_fnmatch': dc_fnmatch}
 
     # put crop limit everywhere there is 'crop_limit'
+    replace_value_of_tags(json_template_loaded, 'crop_limit', crop_limit)
 
+    full_process_start_time = datetime.now()
+    logger.info(f"Launching the imars3D command line")
 
+    # save the json imars3d config file shared/autoreduce/ folder
+    json_config_file_name = create_json_config_file_name(input_folder=input_folder,
+                                                         output_dir=outputdir)
+    save_json(json_config_file_name, json_template_loaded)
 
+    cmd = f"imarsd3d {json_config_file_name}"
+    logger.info(f"About to run {cmd =}")
 
-
+    full_process_end_time = datetime.now()
     logger.info(f"{SUCCESSFUL_MESSAGE}")
-
-
+    logger.info(f"Reconstuction done in {full_process_end_time - full_process_start_time}s!")
 
 
 if __name__ == "__main__":

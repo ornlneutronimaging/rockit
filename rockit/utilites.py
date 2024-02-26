@@ -200,16 +200,26 @@ def load_json(json_file):
 		return json.load(f)
 
 
-def find_tags_with_name_recursive(dictionary, name, found_tags=None):
+def save_json(json_file_name, dictionary):
+	with open(json_file_name, 'w') as outfile:
+		json.dump(dictionary, outfile)
 
-    if found_tags is None:
-        found_tags = []
 
-    for key, value in dictionary.items():
-        if key == name:
-            found_tags.append(key)
+def replace_value_of_tags(dictionary, name, new_value):
+	"""this will replace the value of a tag, no matter where it is in the dictionary"""
+
+	for key, value in dictionary.items():
+		if key == name:
+			dictionary[name] = new_value
 
         if isinstance(value, dict):
-            find_tags_with_name_recursive(value, name, found_tags)
+            replace_value_of_tags(value, name, new_value)
 
-    return found_tags
+
+def create_json_config_file_name(input_folder, output_dir):
+	"""create the name of the json config file
+	this json file will be placed in the parent folder of the reconstructed slices
+	"""
+	base_input_folder = os.path.basename(input_folder)
+	json_config = os.path.join(os.path.dirname(output_dir), f"{base_input_folder}_imars3d_config.json")
+	return json_config
