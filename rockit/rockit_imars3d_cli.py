@@ -3,6 +3,7 @@ import logging
 import os
 import glob
 from datetime import datetime
+from pathlib import Path
 
 from utilites import load_json, save_json, replace_value_of_tags, create_json_config_file_name
 
@@ -23,11 +24,12 @@ else:
 
 LOG_EXTENSION = "_imars3d_autoreduce.log"
 METADATA_JSON = "_sample_ob_dc_metadata.json"
+IMARS3D_CONFIG_JSON = "_imars3d_config.json"
 
-if DEBUG:
-    IMARS3D_JSON = "/Users/j35/HFIR/CG1D/shared/autoreduce/imars3d_reconstruction_config.json"
-else:
-    IMARS3D_JSON = "/HFIR/CG1D/shared/autoreduce/imars3d_reconstruction_config.json"
+# if DEBUG:
+#     IMARS3D_JSON = "/Users/j35/HFIR/CG1D/shared/autoreduce/imars3d_reconstruction_config.json"
+# else:
+#     IMARS3D_JSON = "/HFIR/CG1D/shared/autoreduce/imars3d_reconstruction_config.json"
 
 
 def main(args):
@@ -145,7 +147,8 @@ def main(args):
     crop_limit = [roi_xmin, roi_xmax, roi_ymin, roi_ymax]
     ct_fnmatch = ob_fnmatch = dc_fnmatch = "*.tiff"
 
-    json_template_loaded = load_json(IMARS3D_JSON)
+    imars3d_json = f"{TOP_FOLDER}/IPTS-{ipts_number}/shared/autoreduce/{name}_{IMARS3D_CONFIG_JSON}"
+    json_template_loaded = load_json(imars3d_json)
 
     json_template_loaded['ipts'] = ipts
     json_template_loaded['name'] = name

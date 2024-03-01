@@ -66,6 +66,9 @@ def read_tiff_stack(fdir, fname: list):
 	return arr
 
 
+def read_tiff(full_file_name):
+	dxchange.read_tiff(os.path.join(fdir, name))
+
 def read_tiff_from_full_name_list(list_files: list):
 	arr = _init_arr_from_stack(list_files[0], len(list_files))
 	for m, _file in enumerate(list_files):
