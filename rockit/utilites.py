@@ -5,106 +5,110 @@ import os
 import glob
 import tomopy
 import json
+
+
 # import svmbir
 # import bm3d_streak_removal as bm3d_rmv
 
 def get_ind_list(name_list: list):
-	ind = []
-	ang_deg = []
-	ang_rad = []
-	ind_dict_random = {}
-	ind_dict_sorted = {}
-	for e_name in name_list:
-		_split = e_name.split('_')
-		_index_tiff = _split[-1]
-		_index = _index_tiff.split('.')[0]
-		_ang = _split[-3] + '.' + _split[-2]
-		index = int(_index)
-		angle = float(_ang)
-		ind.append(index)
-		ang_deg.append(angle)
-		ang_rad.append(math.radians(angle))
-		ind_dict_random[index] = e_name
-	ind = sorted(ind)
-	for n, e_ind in enumerate(ind):
-		ind_dict_sorted[n] = ind_dict_random[e_ind]
+    ind = []
+    ang_deg = []
+    ang_rad = []
+    ind_dict_random = {}
+    ind_dict_sorted = {}
+    for e_name in name_list:
+        _split = e_name.split('_')
+        _index_tiff = _split[-1]
+        _index = _index_tiff.split('.')[0]
+        _ang = _split[-3] + '.' + _split[-2]
+        index = int(_index)
+        angle = float(_ang)
+        ind.append(index)
+        ang_deg.append(angle)
+        ang_rad.append(math.radians(angle))
+        ind_dict_random[index] = e_name
+    ind = sorted(ind)
+    for n, e_ind in enumerate(ind):
+        ind_dict_sorted[n] = ind_dict_random[e_ind]
 
-	return list(ind_dict_sorted.values()), (sorted(ang_deg)), np.array(sorted(ang_rad)), ind
+    return list(ind_dict_sorted.values()), (sorted(ang_deg)), np.array(sorted(ang_rad)), ind
 
 
 def get_list(name_list: list):
-	ind = []
-	ind_dict_random = {}
-	ind_dict_sorted = {}
-	for e_name in name_list:
-		_split = e_name.split('_')
-		_index_tiff = _split[-1]
-		_index = _index_tiff.split('.')[0]
-		index = int(_index)
-		ind.append(index)
-		ind_dict_random[index] = e_name
-	ind = sorted(ind)
-	for n, e_ind in enumerate(ind):
-		ind_dict_sorted[n] = ind_dict_random[e_ind]
+    ind = []
+    ind_dict_random = {}
+    ind_dict_sorted = {}
+    for e_name in name_list:
+        _split = e_name.split('_')
+        _index_tiff = _split[-1]
+        _index = _index_tiff.split('.')[0]
+        index = int(_index)
+        ind.append(index)
+        ind_dict_random[index] = e_name
+    ind = sorted(ind)
+    for n, e_ind in enumerate(ind):
+        ind_dict_sorted[n] = ind_dict_random[e_ind]
 
-	return list(ind_dict_sorted.values()), ind
+    return list(ind_dict_sorted.values()), ind
 
 
 def _init_arr_from_stack(fname, number_of_files, slc=None):
-	"""
-	Initialize numpy array from files in a folder.
-	"""
-	_arr = dxchange.read_tiff(fname, slc)
-	size = (number_of_files, _arr.shape[0], _arr.shape[1])
-	return np.empty(size, dtype=_arr.dtype)
+    """
+    Initialize numpy array from files in a folder.
+    """
+    _arr = dxchange.read_tiff(fname, slc)
+    size = (number_of_files, _arr.shape[0], _arr.shape[1])
+    return np.empty(size, dtype=_arr.dtype)
 
 
 def read_tiff_stack(fdir, fname: list):
-	arr = _init_arr_from_stack(os.path.join(fdir, fname[0]), len(fname))
-	for m, name in enumerate(fname):
-		arr[m] = dxchange.read_tiff(os.path.join(fdir, name))
-	return arr
+    arr = _init_arr_from_stack(os.path.join(fdir, fname[0]), len(fname))
+    for m, name in enumerate(fname):
+        arr[m] = dxchange.read_tiff(os.path.join(fdir, name))
+    return arr
 
 
 def read_tiff(full_file_name):
-	dxchange.read_tiff(os.path.join(fdir, name))
+    dxchange.read_tiff(os.path.join(fdir, name))
+
 
 def read_tiff_from_full_name_list(list_files: list):
-	arr = _init_arr_from_stack(list_files[0], len(list_files))
-	for m, _file in enumerate(list_files):
-		arr[m] = dxchange.read_tiff(_file)
-	return arr
+    arr = _init_arr_from_stack(list_files[0], len(list_files))
+    for m, _file in enumerate(list_files):
+        arr[m] = dxchange.read_tiff(_file)
+    return arr
 
 
 def find_proj180_ind(ang_list: list):
-	dif = [abs(x - 180) for x in ang_list]
-	difmin = min(dif)
-	ind180 = dif.index(difmin)
-	return (ind180, ang_list[ind180])
+    dif = [abs(x - 180) for x in ang_list]
+    difmin = min(dif)
+    ind180 = dif.index(difmin)
+    return (ind180, ang_list[ind180])
 
 
 def shrink_window(corners, size):
-	corners[0][0] = corners[0][0] + size
-	corners[0][1] = corners[0][1] + size
-	corners[1][0] = corners[1][0] + size
-	corners[1][1] = corners[1][1] - size
-	corners[2][0] = corners[2][0] - size
-	corners[2][1] = corners[2][1] - size
-	corners[3][0] = corners[3][0] - size
-	corners[3][1] = corners[3][1] + size
-	return corners
+    corners[0][0] = corners[0][0] + size
+    corners[0][1] = corners[0][1] + size
+    corners[1][0] = corners[1][0] + size
+    corners[1][1] = corners[1][1] - size
+    corners[2][0] = corners[2][0] - size
+    corners[2][1] = corners[2][1] - size
+    corners[3][0] = corners[3][0] - size
+    corners[3][1] = corners[3][1] + size
+    return corners
 
 
 def set_roi(corners, xmin, ymin, xmax, ymax):
-	corners[0][0] = xmin
-	corners[0][1] = ymin
-	corners[1][0] = xmin
-	corners[1][1] = ymax
-	corners[2][0] = xmax
-	corners[2][1] = ymax
-	corners[3][0] = xmax
-	corners[3][1] = ymin
-	return corners
+    corners[0][0] = xmin
+    corners[0][1] = ymin
+    corners[1][0] = xmin
+    corners[1][1] = ymax
+    corners[2][0] = xmax
+    corners[2][1] = ymax
+    corners[3][0] = xmax
+    corners[3][1] = ymin
+    return corners
+
 
 ################################################ Added on 8/24/2022
 
@@ -124,15 +128,15 @@ def get_name_and_idx(fdir):
     fname, idx_list = get_list(fname_list)
     return fname, idx_list
 
-    
+
 def load_ct(fdir, ang1=0, ang2=360, name="raw*"):
     if is_routine_ct(fdir):
         ct_list = os.listdir(fdir)
         ct_name, ang_deg, theta, idx_list = get_ind_list(ct_list)
     else:
-        ct_list = glob.glob(fdir+"/"+name)
+        ct_list = glob.glob(fdir + "/" + name)
         ct_name, idx_list = get_list(ct_list)
-        theta = tomopy.angles(len(idx_list), ang1=ang1, ang2=ang2) # Default 360 degree rotation
+        theta = tomopy.angles(len(idx_list), ang1=ang1, ang2=ang2)  # Default 360 degree rotation
         ang_deg = np.rad2deg(theta)
     proj180_ind = find_proj180_ind(ang_deg)[0]
     print('Found index of 180 degree projections: ', proj180_ind)
@@ -141,12 +145,12 @@ def load_ct(fdir, ang1=0, ang2=360, name="raw*"):
     print('Loading CT projections...Done!')
     return proj, theta, proj180_ind
 
-    
+
 def load_ob(fdir, name="ob*"):
     if is_routine_ct(fdir):
         ob_name, idx_list = get_name_and_idx(fdir)
     else:
-        ob_list = glob.glob(fdir+"/"+name)
+        ob_list = glob.glob(fdir + "/" + name)
         ob_name, idx_list = get_list(ob_list)
     print("Loading Open Beam (OB)...")
     ob = read_tiff_stack(fdir=fdir, fname=ob_name)
@@ -158,7 +162,7 @@ def load_dc(fdir, name="dc*"):
     if is_routine_ct(fdir):
         dc_name, idx_list = get_name_and_idx(fdir)
     else:
-        dc_list = glob.glob(fdir+"/"+name)
+        dc_list = glob.glob(fdir + "/" + name)
         dc_name, idx_list = get_list(dc_list)
     print("Loading Dark Current (DC)...")
     dc = read_tiff_stack(fdir=fdir, fname=dc_name)
@@ -167,7 +171,7 @@ def load_dc(fdir, name="dc*"):
 
 
 def remove_ring(proj, algorithm="Vo"):
-    #if algorithm == "Vo":
+    # if algorithm == "Vo":
     proj_rmv = tomopy.prep.stripe.remove_all_stripe(proj)
     # elif algorithm == "bm3d":
     #     proj_norm = bm3d_rmv.extreme_streak_attenuation(proj)
@@ -192,37 +196,37 @@ def recon(proj, theta, rot_center, algorithm="gridrec"):
     recon = tomopy.recon(proj, theta, center=rot_center, algorithm=algorithm, sinogram_order=False)
     recon = tomopy.circ_mask(recon, axis=0, ratio=1)
     return recon
-        
+
 
 def load_json(json_file):
-	"""returns the content of the json file"""
-	if not os.path.exists(json_file):
-		return None
+    """returns the content of the json file"""
+    if not os.path.exists(json_file):
+        return None
 
-	with open(json_file, 'r') as f:
-		return json.load(f)
+    with open(json_file, 'r') as f:
+        return json.load(f)
 
 
 def save_json(json_file_name, dictionary):
-	with open(json_file_name, 'w') as outfile:
-		json.dump(dictionary, outfile)
+    with open(json_file_name, 'w') as outfile:
+        json.dump(dictionary, outfile)
 
 
 def replace_value_of_tags(dictionary, name, new_value):
-	"""this will replace the value of a tag, no matter where it is in the dictionary"""
+    """this will replace the value of a tag, no matter where it is in the dictionary"""
 
-	for key, value in dictionary.items():
-		if key == name:
-			dictionary[name] = new_value
+    for key, value in dictionary.items():
+        if key == name:
+            dictionary[name] = new_value
 
         if isinstance(value, dict):
             replace_value_of_tags(value, name, new_value)
 
 
 def create_json_config_file_name(input_folder, output_dir):
-	"""create the name of the json config file
-	this json file will be placed in the parent folder of the reconstructed slices
-	"""
-	base_input_folder = os.path.basename(input_folder)
-	json_config = os.path.join(os.path.dirname(output_dir), f"{base_input_folder}_imars3d_config.json")
-	return json_config
+    """create the name of the json config file
+    this json file will be placed in the parent folder of the reconstructed slices
+    """
+    base_input_folder = os.path.basename(input_folder)
+    json_config = os.path.join(os.path.dirname(output_dir), f"{base_input_folder}_imars3d_config.json")
+    return json_config
