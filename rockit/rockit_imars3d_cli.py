@@ -24,12 +24,12 @@ else:
 
 LOG_EXTENSION = "_imars3d_autoreduce.log"
 METADATA_JSON = "_sample_ob_dc_metadata.json"
-IMARS3D_CONFIG_JSON = "_imars3d_config.json"
+IMARS3D_CONFIG_JSON = "imars3d_config.json"
 
-# if DEBUG:
-#     IMARS3D_JSON = "/Users/j35/HFIR/CG1D/shared/autoreduce/imars3d_reconstruction_config.json"
-# else:
-#     IMARS3D_JSON = "/HFIR/CG1D/shared/autoreduce/imars3d_reconstruction_config.json"
+if DEBUG:
+    IMARS3D_JSON_TEMPLATE = "/Users/j35/HFIR/CG1D/shared/autoreduce/imars3d_reconstruction_config.json"
+else:
+    IMARS3D_JSON_TEMPLATE = "/HFIR/CG1D/shared/autoreduce/imars3d_reconstruction_config.json"
 
 
 def main(args):
@@ -147,8 +147,7 @@ def main(args):
     crop_limit = [roi_xmin, roi_xmax, roi_ymin, roi_ymax]
     ct_fnmatch = ob_fnmatch = dc_fnmatch = "*.tiff"
 
-    imars3d_json = f"{TOP_FOLDER}/IPTS-{ipts_number}/shared/autoreduce/{name}_{IMARS3D_CONFIG_JSON}"
-    json_template_loaded = load_json(imars3d_json)
+    json_template_loaded = load_json(IMARS3D_JSON_TEMPLATE)
 
     json_template_loaded['ipts'] = ipts
     json_template_loaded['name'] = name
@@ -167,11 +166,11 @@ def main(args):
     logger.info(f"Launching the imars3D command line")
 
     # save the json imars3d config file shared/autoreduce/ folder
-    json_config_file_name = create_json_config_file_name(input_folder=input_folder,
-                                                         output_dir=outputdir)
+    json_config_file_name = create_json_config_file_name(output_folder=outputdir,
+                                                         name=name)
     save_json(json_config_file_name, json_template_loaded)
 
-    cmd = f"imarsd3d {json_config_file_name}"
+    cmd = f"source /opt/anaconda/etc/profile.d/conda.sh; conda activate imars3d; python -m imarsd3d.backend {json_config_file_name}"
     logger.info(f"About to run {cmd =}")
 
     full_process_end_time = datetime.now()

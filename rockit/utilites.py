@@ -5,6 +5,7 @@ import os
 import glob
 import tomopy
 import json
+from pathlib import Path
 
 
 # import svmbir
@@ -223,10 +224,9 @@ def replace_value_of_tags(dictionary, name, new_value):
             replace_value_of_tags(value, name, new_value)
 
 
-def create_json_config_file_name(input_folder, output_dir):
+def create_json_config_file_name(output_folder, name):
     """create the name of the json config file
     this json file will be placed in the parent folder of the reconstructed slices
     """
-    base_input_folder = os.path.basename(input_folder)
-    json_config = os.path.join(os.path.dirname(output_dir), f"{base_input_folder}_imars3d_config.json")
+    json_config = os.path.join(str(Path(output_folder).parent), f"{name}_imars3d_config.json")
     return json_config

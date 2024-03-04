@@ -8,7 +8,7 @@ import time
 from PIL import Image
 
 DEBUG = False
-LOG_FILE_MAX_LINES_NUMBER = 3000
+LOG_FILE_MAX_LINES_NUMBER = 1000
 
 if DEBUG:
 	HOME_FOLDER = "/Users/j35/HFIR/CG1D/shared/autoreduce/"
@@ -29,20 +29,20 @@ CONFIG_FILE = os.path.join(HOME_FOLDER, "autoreduce_cg1d_config.yaml")
 JSON_BASENAME = "ct_scans_folder_processed.json"
 LOG_FILE = os.path.join(HOME_FOLDER, "reduce_cg1d.log")
 
-CMD = "python " + os.path.join(CMD_FOLDER, "rockit_cli.py")
+CMD = "source /opt/anaconda/etc/profile.d/conda.sh; conda activate /SNS/users/j35/.conda/envs/imars3d_jean; python " + os.path.join(CMD_FOLDER, "rockit_imars3d_cli.py")
 
 
 def main():
 
 	# clean up log file
-	with open(CONFIG_FILE, 'r') as config_file:
-		config_file_content = config_file.readlines()
+	with open(LOG_FILE, 'r') as log_file:
+		log_file_content = log_file.readlines()
 
-	if len(config_file_content) > LOG_FILE_MAX_LINES_NUMBER:
-		config_file_content = config_file_content[-LOG_FILE_MAX_LINES_NUMBER:]
+	if len(log_file_content) > LOG_FILE_MAX_LINES_NUMBER:
+		log_file_content = log_file_content[-LOG_FILE_MAX_LINES_NUMBER:]
 
-	with open(CONFIG_FILE, 'w') as config_file:
-		config_file.writelines(config_file_content)
+	with open(LOG_FILE, 'w') as log_file:
+		log_file.writelines(log_file_content)
 
 	logging.info(f"HOME_FOLDER: {HOME_FOLDER}")
 	logging.info(f"IPTS_FOLDER: {IPTS_FOLDER}")
@@ -55,6 +55,12 @@ def main():
 
 	with open(CONFIG_FILE, 'r') as stream:
 		yml_file = yaml.safe_load(stream)
+
+	autoreduce_flag = yml_file['autoreduction']
+	if autoreduce_flag is False:
+		logging.info(f"autoreduction is off!")
+		logging.info(f"... Exiting auto-reconstruction!")
+		return False
 
 	ipts = yml_file['DataPath']['ipts']
 	logging.info(f"> IPTS: {ipts}")
@@ -131,6 +137,8 @@ def main():
 	with open(json_file, 'w') as f:
 		json.dump(config, f)
 
+	logging.info("Building the command line:")
+
 	# roi
 	roi_mode = yml_file['ROI']['mode']
 	cmd_roi = ""
@@ -151,13 +159,18 @@ def main():
 		roi_ymax = yml_file['ROI']['ymax']
 		if roi_ymax:
 			cmd_roi += f" -roi_ymax {roi_ymax}"
+	logging.info(f" {cmd_roi =}")
 
 	# ob auto selection
 	ob_auto_selection_mode = yml_file['ob_auto_selection']['mode']
+	logging.info(f"Debugging ob auto selection!")
 	if not ob_auto_selection_mode:
 		cmd_ob = ""
+		logging.info(f" - without ob_auto_selection_mode !")
 	else:
+		logging.info(f" - with ob_auto_selection_mode !")
 		use_max_number_of_files = yml_file['ob_auto_selection']['use_max_number_of_files']
+		logging.info(f"  {use_max_number_of_files =}")
 		if use_max_number_of_files:
 			max_number_of_ob_files = yml_file['ob_auto_selection']['max_number_of_files']
 			cmd_ob = f"-maximum_number_of_obs {max_number_of_ob_files}"
@@ -167,12 +180,12 @@ def main():
 			ob_hours = yml_file['ob_auto_selection']['hours']
 			ob_minutes = (ob_days * 24 * 60) + ob_minutes + (ob_hours * 60)
 			cmd_ob = f"-maximum_time_difference_between_sample_and_ob_acquisition {ob_minutes}"
+	logging.info(f" {cmd_ob =}")
 
 	# # retrieve the list of tiff files in the new folders and for each, launch a reconstruction
 	for _folder in list_new_folders:
-		cmd = f"{CMD} {cmd_ob} {cmd_roi} {cmd_roi} {ipts} {_folder}"
+		cmd = f"{CMD} {cmd_ob} {cmd_roi} {ipts} {_folder}"
 		logging.info(f"> running {cmd}")
-		print(f"{cmd}")
 		proc = subprocess.Popen(cmd, shell=True, stdin=subprocess.PIPE, universal_newlines=True)
 		proc.communicate()
 
