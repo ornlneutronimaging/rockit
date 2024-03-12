@@ -2,6 +2,7 @@ import argparse
 import logging
 import os
 import glob
+import subprocess
 from datetime import datetime
 from pathlib import Path
 
@@ -172,6 +173,8 @@ def main(args):
 
     cmd = f"source /opt/anaconda/etc/profile.d/conda.sh; conda activate imars3d; python -m imarsd3d.backend {json_config_file_name}"
     logger.info(f"About to run {cmd =}")
+    proc = subprocess.Popen(cmd, shell=True, stdin=subprocess.PIPE, universal_newlines=True)
+    proc.communicate()
 
     full_process_end_time = datetime.now()
     logger.info(f"{SUCCESSFUL_MESSAGE}")
