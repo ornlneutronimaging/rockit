@@ -2,6 +2,7 @@ import argparse
 import logging
 import os
 import glob
+import subprocess
 from datetime import datetime
 import subprocess
 from pathlib import Path
@@ -176,8 +177,6 @@ def main(args):
     logger.info(f"About to run {cmd =}")
     proc = subprocess.Popen(cmd, shell=True, stdin=subprocess.PIPE, universal_newlines=True)
     proc.communicate()
-    
-
     logger.info(f"{SUCCESSFUL_MESSAGE}")
 
 
