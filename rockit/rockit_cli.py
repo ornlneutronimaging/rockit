@@ -5,6 +5,7 @@ import os
 import glob
 import shutil
 from datetime import datetime
+import pathlib
 
 import dxchange
 from tomopy import find_center_pc, circ_mask, normalize, minus_log
@@ -16,7 +17,7 @@ from tomopy.prep.stripe import remove_all_stripe
 
 import numpy as np
 import bm3d_streak_removal as bm3d_rmv
-from imars3dv2.filters import tilt
+from imars3d.backend.diagnostics import tilt
 from utilites import get_ind_list, find_proj180_ind, read_tiff_stack, read_tiff_from_full_name_list, set_roi
 
 import warnings
@@ -49,8 +50,8 @@ def main(args):
     ipts_folder = os.path.join(TOP_FOLDER, f"IPTS-{ipts_number}")
     raw_folder = os.path.join(ipts_folder, 'raw')
     reduction_log_folder = os.path.join(ipts_folder, "shared/autoreduce/reduction_log")
-    log_file_name = os.path.join(reduction_log_folder, os.path.basename(input_folder) + LOG_EXTENSION)
-    sample_ob_dc_metadata_json = os.path.join(reduction_log_folder, os.path.basename(input_folder) + METADATA_JSON)
+    log_file_name = os.path.join(reduction_log_folder, str(pathlib.Path(input_folder).name) + LOG_EXTENSION)
+    sample_ob_dc_metadata_json = os.path.join(reduction_log_folder, str(pathlib.Path(input_folder).name) + METADATA_JSON)
 
     roi_xmin = args.roi_xmin if args.roi_xmin else None
     roi_ymin = args.roi_ymin if args.roi_ymin else None

@@ -3,6 +3,7 @@ import logging
 import os
 import glob
 from datetime import datetime
+import subprocess
 from pathlib import Path
 
 from utilites import load_json, save_json, replace_value_of_tags, create_json_config_file_name
@@ -14,7 +15,7 @@ warnings.filterwarnings('ignore')
 from samffr.retrieve_matching_ob_dc import RetrieveMatchingOBDC
 
 DEBUG = False
-SUCCESSFUL_MESSAGE = "RECONSTRUCTION WAS SUCCESSFUL!"
+SUCCESSFUL_MESSAGE = "RECONSTRUCTION LAUNCHED!"
 
 
 if DEBUG:
@@ -22,7 +23,7 @@ if DEBUG:
 else:
     TOP_FOLDER = "/HFIR/CG1D"
 
-LOG_EXTENSION = "_imars3d_autoreduce.log"
+LOG_EXTENSION = "_autoreduce.log"
 METADATA_JSON = "_sample_ob_dc_metadata.json"
 IMARS3D_CONFIG_JSON = "imars3d_config.json"
 
@@ -158,6 +159,7 @@ def main(args):
                                                   'ct_fnmatch': ct_fnmatch,
                                                   'ob_fnmatch': ob_fnmatch,
                                                   'dc_fnmatch': dc_fnmatch}
+    json_template_loaded['log_file_name'] = log_file_name
 
     # put crop limit everywhere there is 'crop_limit'
     replace_value_of_tags(json_template_loaded, 'crop_limit', crop_limit)
@@ -172,10 +174,11 @@ def main(args):
 
     cmd = f"source /opt/anaconda/etc/profile.d/conda.sh; conda activate imars3d; python -m imarsd3d.backend {json_config_file_name}"
     logger.info(f"About to run {cmd =}")
+    proc = subprocess.Popen(cmd, shell=True, stdin=subprocess.PIPE, universal_newlines=True)
+    proc.communicate()
+    
 
-    full_process_end_time = datetime.now()
     logger.info(f"{SUCCESSFUL_MESSAGE}")
-    logger.info(f"Reconstuction done in {full_process_end_time - full_process_start_time}s!")
 
 
 if __name__ == "__main__":
