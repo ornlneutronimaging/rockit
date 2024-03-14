@@ -174,10 +174,11 @@ def main(args):
     save_json(json_config_file_name, json_template_loaded)
 
     cmd = f"source /opt/anaconda/etc/profile.d/conda.sh; conda activate imars3d; python -m imarsd3d.backend {json_config_file_name}"
-    logger.info(f"About to run {cmd =}")
+    logger.info(f"About to run {cmd =} using os.system")
     cmd += f"; echo 'Done!' >> {log_file_name}"
-    proc = subprocess.Popen(cmd, shell=True, stdin=subprocess.PIPE, universal_newlines=True)
-    proc.communicate()
+    #proc = subprocess.Popen(cmd, shell=True, stdin=subprocess.PIPE, universal_newlines=True)
+    #proc.communicate()
+    os.system(cmd)
     logger.info(f"{SUCCESSFUL_MESSAGE}")
 
 
